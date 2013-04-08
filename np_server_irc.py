@@ -23,7 +23,7 @@ while 1:
 		elif parts[0] == "PRIVMSG":
 			if parts[3] == "CHAT":
 				numip = parts[5]
-				numport = parts[6].replace("\x01,""")
+				numport = parts[6].replace("\x01","")
 				print "Make a callback on " + numip + " " + numport
 			print parts
 
