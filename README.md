@@ -17,7 +17,22 @@ Credits: original NAT  pinning POC by Samy Kamkar: http://samy.pl/natpin/
 
 
 Current status:
- - a rough first IRC test is created, follows a fully correct irc conversation up to a DCC chat request (DCC send will also be added)
- - a ftp server is created that supports natpinning test through PASV command and PORT command
- 
- 
+===============
+- a rough first IRC test is created, follows a fully correct irc conversation up to a DCC chat request (DCC send will also be added)
+- a ftp server is created that supports natpinning test through PASV command and PORT command
+
+
+Usage: IRC
+============
+start up np_server_irc.py on the internet based host
+then run np_client_irc.py on the host behind the NAT router (-h for help)
+e.g.: Usage: np_client_irc.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -s IRCSERVER, --server=IRCSERVER
+                        IRC server
+  -i CALLBACKIP, --ip=CALLBACKIP
+                        IP to call back on
+  -p CALLBACKPORT, --port=CALLBACKPORT
+                        Port to call back on
