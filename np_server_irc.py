@@ -21,8 +21,12 @@ while 1:
 		if parts[0]=="NICK":
 			cFile.write(":irc.khleuven.be 376 natpin252 :End of /MOTD command.\r\n")
 		elif parts[0] == "PRIVMSG":
+<<<<<<< HEAD
 			if parts[3] == "CHAT":
 				numip = parts[5]
 				numport = parts[6].replace("\x01,""")
 				print "Make a callback on " + numip + " " + numport
+=======
+			print parts
+>>>>>>> 6f4c95108198afa06a661f4dc03d6d586f0240a2
 
