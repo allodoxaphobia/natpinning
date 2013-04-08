@@ -30,7 +30,7 @@ cFile.write("irc.khleuven.be NOTICE AUTH :*** Looking up your hostname...\r\n")
 while 1:
 	line = cFile.readline().strip()
 	parts = line.split(" ")
-	#print line #use for debugging
+	#print line #use for debugging 
 	if parts[0]=="NICK":
 		cFile.write(":irc.khleuven.be 376 natpin252 :End of /MOTD command.\r\n")
 	elif parts[0] == "PRIVMSG":
