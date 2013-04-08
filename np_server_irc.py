@@ -12,10 +12,16 @@ s.bind(("",6667))
 s.listen(1)
 
 def callback(host,port):
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)		
-	s.connect((host,port))
-	s.send("test\n")
-	s.close()
+	try:
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)		
+		s.connect((host,port))
+		s.send("test\n")
+		s.close()
+		return 1
+	except:
+		return 0
+#end def
+
 while 1:
 	cSock, cAddr = s.accept()
 	cFile = cSock.makefile('rw',0)
@@ -33,6 +39,9 @@ while 1:
 			
 				numport = parts[6].replace("\x01","")
 				print "Nat PIN " + cAddr[0] + "=> " + str(numip) + " on port " + numport
-				callback(cAddr[0],int(numport))
+				if callback(cAddr[0],int(numport)) == 1:
+					print "Success"
+				else:
+					print "Failed"
 			print parts
 

