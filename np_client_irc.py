@@ -18,6 +18,7 @@ IRC_BOUNCE_NICK="raf"
 CALLBACK_PORT= 8080
 CALLBACK_IP = "192.168.0.198"
 
+
 class IRCClient():
 	class serverMSG():
 		def __init__(self, msg):
@@ -77,6 +78,17 @@ class IRCClient():
 	#end def
 #end class
 
-x = IRCClient(sys.argv[1],6667)
+parser = OptionParser()
+parser.add_option('-s','--server', dest="ircserver", help="IRC server")
+parser.add_option('-i','--ip', dest="callbackip",help="IP to call back on")
+parser.add_option('-p','--port', dest="callbackport",help="Port to call back on")
+
+(opts,args) =parser.parse_args()
+if (opts.ircserver is None) or (opts.callbackip is None) or (opts.callbackport is None):
+	print "Invalid args, add -h for options"
+else:
+	CALLBACK_PORT= int(opts.callbackport)
+	CALLBACK_IP = opts.callbackip
+	x = IRCClient(opts.ircserver,6667)
 #x = IRCClient("127.0.0.1",6667)
 

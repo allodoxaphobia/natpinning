@@ -5,6 +5,7 @@ import random
 import socket
 import struct
 
+EXIT_AFTER_CALLBACK = 1
 
 s= socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
@@ -38,10 +39,13 @@ while 1:
 				numip = socket.inet_ntoa(struct.pack('!I', numip))
 			
 				numport = parts[6].replace("\x01","")
-				print "Nat PIN " + cAddr[0] + "=> " + str(numip) + " on port " + numport
+				callb_line = "Nat PIN " + cAddr[0] + "=> " + str(numip) + " on port " + numport
 				if callback(cAddr[0],int(numport)) == 1:
-					print "Success"
+					print callb_line + " :Success"
 				else:
-					print "Failed"
+					print callb_line + " :Failed"
+				if EXIT_AFTER_CALLBACK==1:
+					s.close()
+					break
 			print parts
 
