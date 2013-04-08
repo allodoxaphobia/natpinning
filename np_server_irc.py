@@ -24,6 +24,6 @@ while 1:
 			if parts[3] == "CHAT":
 				numip = parts[5]
 				numport = parts[6].replace("\x01","")
-				print "Make a callback on " + numip + " " + numport
+				print "Make a callback on " + socket.inet_ntoa(struct.pack('L',numip) + " " + numport
 			print parts
 
