@@ -13,7 +13,7 @@ The setup will allways be the same; client modules are loaded on a host on the t
 Once the client and server are communicating and one of them triggers the nat pinning/port forwarding, an automatic connect test to the forwarded port will be made to validate wether the test was 
 succesfull.
 
-Credits: original NAT  pinning POC by Smy Kamkar: http://samy.pl/natpin/
+Credits: original NAT  pinning POC by Samy Kamkar: http://samy.pl/natpin/
 
 
 Current status:
