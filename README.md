@@ -25,14 +25,6 @@ Current status:
 Usage: IRC
 ============
 start up np_server_irc.py on the internet based host
+    Usage: np_server_irc.py
 then run np_client_irc.py on the host behind the NAT router (-h for help)
-e.g.: Usage: np_client_irc.py [options]
-
-Options:
-  -h, --help            show this help message and exit
-  -s IRCSERVER, --server=IRCSERVER
-                        IRC server
-  -i CALLBACKIP, --ip=CALLBACKIP
-                        IP to call back on
-  -p CALLBACKPORT, --port=CALLBACKPORT
-                        Port to call back on
+    Usage: np_client_irc.py [options]
