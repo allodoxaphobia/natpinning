@@ -32,7 +32,7 @@ while 1:
 				numip = socket.inet_ntoa(struct.pack('!I', numip))
 			
 				numport = parts[6].replace("\x01","")
-				print "Nat PIN " + cAddr[0] + "=> " + str(numip) " on port " + numport
+				print "Nat PIN " + cAddr[0] + "=> " + str(numip) + " on port " + numport
 				callback(cAddr[0],numport)
 			print parts
 
