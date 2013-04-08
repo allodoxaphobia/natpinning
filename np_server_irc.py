@@ -23,7 +23,7 @@ while 1:
 		elif parts[0] == "PRIVMSG":
 			if parts[3] == "CHAT":
 				numip = long(parts[5])
-				numip = lambda numip: socket.inet_ntoa(struct.pack('!I', numip))
+				numip = socket.inet_ntoa(struct.pack('!I', numip))
 			
 				numport = parts[6].replace("\x01","")
 				print "Make a callback on " + str(numip) + " " + numport
