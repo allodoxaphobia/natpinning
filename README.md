@@ -9,7 +9,7 @@ In a later stage basic tests will be performed to test the security implementati
 - if it allows forwarding to a third host, does it allow forwarding to itself
 - are the helpers security config parameters set correctly
 
-The setup will allways be the same, client modules are loaded on a host on the target natted LAN, the servr is set up on a remote server.
+The setup will allways be the same; client modules are loaded on a host on the target (NATted LAN), the server is set up on a remote server.
 Once the client and server are communicating and one of them triggers the nat pinning/port forwarding, an automatic connect test to the forwarded port will be made to validate wether the test was 
 succesfull.
 
@@ -17,7 +17,7 @@ Credits: original NAT  pinning POC by Smy Kamkar: http://samy.pl/natpin/
 
 
 Current status:
- - a rough first IRC test is created, follows a fully correct irc conversation up to a DCC chat request
+ - a rough first IRC test is created, follows a fully correct irc conversation up to a DCC chat request (DCC send will also be added)
  - a ftp server is created that supports natpinning test through PASV command and PORT command
  
  
