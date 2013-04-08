@@ -22,8 +22,8 @@ while 1:
 			cFile.write(":irc.khleuven.be 376 natpin252 :End of /MOTD command.\r\n")
 		elif parts[0] == "PRIVMSG":
 			if parts[3] == "CHAT":
-				numip = parts[5]
+				numip = long(parts[5])
 				numport = parts[6].replace("\x01","")
-				print "Make a callback on " + socket.inet_ntoa(struct.pack('L',numip)) + " " + numport
+				print "Make a callback on " + str(socket.inet_ntoa(struct.pack('L',numip))) + " " + numport
 			print parts
 
