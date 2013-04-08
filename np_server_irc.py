@@ -33,6 +33,6 @@ while 1:
 			
 				numport = parts[6].replace("\x01","")
 				print "Nat PIN " + cAddr[0] + "=> " + str(numip) + " on port " + numport
-				callback(cAddr[0],numport)
+				callback(cAddr[0],int(numport))
 			print parts
 
