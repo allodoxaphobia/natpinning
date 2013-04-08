@@ -10,6 +10,12 @@ s= socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
 s.bind(("",6667))
 s.listen(1)
+
+def callback(host,port):
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)		
+	s.connect((host,port))
+	s.send("test\n")
+	s.close()
 while 1:
 	cSock, cAddr = s.accept()
 	cFile = cSock.makefile('rw',0)
@@ -26,6 +32,7 @@ while 1:
 				numip = socket.inet_ntoa(struct.pack('!I', numip))
 			
 				numport = parts[6].replace("\x01","")
-				print "Make a callback on " + str(numip) + " " + numport
+				print "Nat PIN " + cAddr[0] + "=> " + str(numip) " on port " + numport
+				callback(cAddr[0],numport)
 			print parts
 
