@@ -30,7 +30,7 @@ class FTPClient():
 					print cmd
 					self.s.send(cmd + "\r\n")
 				elif x[0] == "200": #last cmd succesfull, send list
-					self.s.send("LIST\r\n") #after this command is send, the servi will try connectin on callback port
+					slef.s.send("LIST\r\n") #after this command is send, the servi will try connectin on callback port
 	#end def
 	def connect(self):
 		self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)		

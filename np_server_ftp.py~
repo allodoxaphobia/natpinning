@@ -14,7 +14,6 @@ def testNatPin(ip,port):
 	try:
 		s.connect((ip,port))
 		sleep(2)
-		s.send("test natpinning")
 		s.close()
 		return "OK"
 	except:

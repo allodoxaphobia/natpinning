@@ -4,6 +4,7 @@ from threading import Thread
 import random
 import socket
 import struct
+import sys
 
 
 #Natpinnging via:
