@@ -1,3 +1,9 @@
 https://home.regit.org/netfilter-en/secure-use-of-helpers/
 above suggests amanda as being tcp, nf_conntrack_amanda.c identifies them as UDP however.
+nf_conntrack code examples http://www.cs.fsu.edu/~baker/devices/lxr/http/source/linux/net/netfilter/
+
+sane project site: http://www.sane-project.org/contrib.html
+setup sane test suite: https://help.ubuntu.com/community/ScanningHowTo
+
+H323 http://en.wikipedia.org/wiki/H.323
 
