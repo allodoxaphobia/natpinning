@@ -16,5 +16,5 @@ class TFTPClient():
 	#end def
 #end class
 
-x = TFTPClient("62.213.198.42",69,"192.168.1.2",111) #portmapping for the win
+x = TFTPClient("IP_HERE",69,"192.168.1.2",111) #portmapping for the win
 
