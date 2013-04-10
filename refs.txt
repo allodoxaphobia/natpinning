@@ -1,1 +1,3 @@
 https://home.regit.org/netfilter-en/secure-use-of-helpers/
+above suggests amanda as being tcp, nf_conntrack_amanda.c identifies them as UDP however.
+
