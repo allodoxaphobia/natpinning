@@ -35,3 +35,23 @@ start up np_server_irc.py on the internet based host
 then run np_client_irc.py on the host behind the NAT router (-h for help)
     Usage: np_client_irc.py [options]
 
+Writing Protocol Classes: Clients
+===================================
+add a new class file to client/modules
+Make the class inherit Base and override the protocolhandler function
+
+the structure of your protocolhandler should be
+def protcolhandler(self):
+	while 1:
+		#do your thing here, at this point the callback port to test natpinning is already set up
+		#and you are connected to the remote server, so here you need to handle communications to your server
+		#the socket to do this on is self.sSock
+		pass
+	#end while
+#end def
+
+there are some test samples on how to address the classes in tests.py
+For examples of how to make your class, see the current classes in /client/modules
+
+
+
