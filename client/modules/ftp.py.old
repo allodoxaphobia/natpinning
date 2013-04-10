@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+#filename=ftp.py
+from base import *
+import struct
+
+class Client(Base):
+	def run(self):
+		clientSock = self.connectTCP(self.loBase.sIp,self.loBase.sPort)
+		if clientSock is not None: #set to none on error
+			self._callback() #sets up callback socket
+			while self.Result == "": #wait for testresults
+				indata = self.sSock.recv(1024).split('\r\n')
+				for line in indata:
+					x = line.split(" ",2)
+					if x[0] == "220": #server banner
+						print "Connected"
+						self.sSock.send("USER anonymous\r\n")
+					elif x[0] == "331": #send pass
+						self.sSock.send("PASS natpin@work.net\r\n")
+					elif x[0] == "230": #logged in succesfully
+						cmd = "PORT " + self.cbIp.replace(".",",")
+						for val in self.ftpCalcPortNotation(self.cbPort):
+							cmd = cmd + "," + str(val)
+						print cmd
+						self.sSock.send(cmd + "\r\n")
+					elif x[0] == "200": #last cmd succesfull, send list
+						self..sSock.send("LIST\r\n") #after this command is send, the server will try connecting on callback port
+			print self.Result
+			self.destroy()
+		else:
+			print "Failed to connect to " + self.sIp + " on port " + str(self.sPort)
+	#end def
+	def communicate():
+			self.sockThread = Thread(target=self.callbackTCP)
+			self.sockThread.start()
+	#end def
+	def ftpCalcPortNotation(self,port):
+		x = port%256
+		y = (port -x)/256
+		return (y,x)
+	#end def
+#end class

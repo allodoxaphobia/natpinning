@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+#filename=irc.py
+from base import *
+import struct
+
+class Client():
+	loBase = None
+	IRC_NICK = "natpin" + str(random.randint(1, 1000))
+	IRC_BOUNCE_NICK="raf"
+	
+	def __init__(self,serverip, serverport,callbackip,callbackport):
+		self.loBase = Base("TCP",serverip, serverport,callbackip,callbackport)
+	#end if
+	def run(self):
+		#this is where the magic happens
+		#connect to server
+		#setup callback port
+		#wait for callback and close down when done
+		clientSock = self.loBase.connectTCP(self.loBase.sIp,self.loBase.sPort)
+		if clientSock is not None: #set to none on error
+			self.loBase._callback() #sets up callback socket
+			while self.loBase.Result == "": #wait for testresults
+				indata = self.loBase.sSock.recv(1024).split('\r\n')
+				for line in indata:
+					x = serverMSG(line)
+					if x.Ok==1: self.handlemsg(x)
+			print self.loBase.Result
+			self.loBase.destroy()
+	#end def
+	
+	def handlemsg(self,servermsg):
+		if servermsg.Type== "NOTICE" and servermsg.SubType=="AUTH":
+			self.loBase.sSock.send("NICK "+self.IRC_NICK+"\r\n")
+			self.loBase.sSock.send("USER "+self.IRC_NICK+" "+self.IRC_NICK+" "+self.loBase.sIp+" :"+self.IRC_NICK+"\r\n")
+		elif servermsg.Type=="PING":
+			self.loBase.sSock.send("PONG " + servermsg.Val + "\r\n")
+			print "PING/PONG"
+		elif servermsg.Type==("376"):
+			self.Connected = 1
+			#self.sSock.send("JOIN #xyz\r\n")
+			self.DCCChat(self.IRC_BOUNCE_NICK,self.loBase.cbIp, self.loBase.cbPort)
+	#end def
+	
+	def DCCChat(self, nick, IPAddress, port):
+		intIP = struct.unpack("!I", socket.inet_aton(IPAddress))[0]
+		self.loBase.sSock.send("PRIVMSG " +nick + " :"+chr(0x01)+"DCC CHAT chat " + str(intIP) + " " + str(port) + chr(0x01)+"\r\n")
+		print "DCC CHAT SEND, try to connect from remote host to " + IPAddress + ":" + str(port)
+	#end def
+#end class
+
+
+class serverMSG():
+	def __init__(self, msg):
+		self.Ok = 0
+		self.Connected = 0
+		#print "RAW = " + msg
+		parts = msg.split(" ",3)
+		if len(parts) == 4 :
+			self.Server = parts[0].replace(":","",1)
+			self.Type = parts[1]
+			self.SubType = parts[2]
+			self.Val= parts[3]
+			self.Ok =1
+		elif parts[0] == "PING":
+			self.Server= ""
+			self.Type="PING"
+			self.SubType=""
+			self.Val= parts[1]
+			self.Ok=1
+	#end def	
+#end class
