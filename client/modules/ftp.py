@@ -9,7 +9,7 @@ class Client(Base):
 	#end def
 	def protocolhandler(self):
 		while 1:		#runs on seperate thread, will be killed when callback results are in
-			indata = self.sSock.recv(512).split('\r\n')
+			indata = self.sSock.recv(1024).split('\r\n')
 			for line in indata:
 				x = line.split(" ",2)
 				if x[0] == "220": #server banner

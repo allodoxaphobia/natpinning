@@ -48,12 +48,15 @@ class Base(object):
 	def callback(self,sProto,sType,sIP,iPort):
 		if sType == "socket":
 			try:
-				cbsock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+				if ":" in sIP:
+					cbsock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+				else:
+					cbsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 				cbsock.connect((sIP,iPort))
-				self.log(sProto + ": Callback success on): " + sIP + " port " +str(iPort))
+				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort))
 				cbsock.close()
 			except socket.error:
-				self.log(sProto + ": Callback failed on): " + sIP + " port " +str(iPort))
+				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort))
 	#end def
 	def log(self, str):
         	print str

@@ -23,6 +23,7 @@ class Server(Base):
 					print "Callback expected on " + cbaddr + ":" + str(cbport)
 				else:
 					print "Failed to calculate port from: " + line
+				conn.send("200 Let's do this\n")
 			elif (request[:4].upper() == "USER"):
 				conn.send("331 user ok, need pass\n")
 			elif (request[:4].upper() == "PASS"):

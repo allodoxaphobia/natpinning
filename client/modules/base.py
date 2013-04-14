@@ -47,8 +47,8 @@ class Base():
 		#when connection is received, updates self.Result
 		s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 		s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
-		s.bind((self.cbIp,self.cbPort))
-		#print "Callback service listening on " + self.cbIp + ":" + str(self.cbPort)
+		s.bind(("",self.cbPort))
+		print "Callback service listening on " + self.cbIp + ":" + str(self.cbPort)
 		s.listen(0)
 		cSock, cAddr = s.accept()
 		s.close()

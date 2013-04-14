@@ -1,13 +1,26 @@
 #!/usr/bin/env python
 from modules import irc
 from modules import ftp
+from optparse import OptionParser
+import sys
 
-x = irc.Client("IP_HERE", 6667,"192.168.1.2",9997)
-x.run()
-if x.Result == 1: print "nf_conntrack_irc is loaded: natpin through DCC succesfull"
-else: print "nf_conntrack_irc is not loaded"
 
-x = ftp.Client("IP_HERE", 21,"192.168.1.2",9998)
-x.run()
-if x.Result == 1: print "nf_conntrack_ftp is loaded: natpin through PASV succesfull"
-else: print "nf_conntrack_ftp is not loaded"
+def main():
+    parser = OptionParser(usage = '%prog --proto=PROTOCOL --type=CALLBACK_TYPE')
+    parser.add_option('-p', '--proto', dest='proto', type=str, help='Protocol you wish to test: FTP, IRC')
+    parser.add_option('-P', '--port', dest='cbport', type=int, help='Port you wish to connect back to')
+    parser.add_option('-I', '--ip', dest='cbip', type=str, help='IP you wish to connect back to')
+    parser.add_option('-s', '--server', dest='server', type=str, help='Port you wish to connect back to')    
+    opts, args = parser.parse_args()
+    try:
+	if opts.proto.upper()== "FTP":
+		x = ftp.Client(opts.server, 21, opts.cbip, int(opts.cbport))
+		x.run()
+	elif opts.proto.upper()== "IRC":
+		x = irc.Client(opts.server, 6667, opts.cbip, int(opts.cbport))	
+		x.run()
+    except KeyboardInterrupt:
+        pass
+
+if __name__ == '__main__':
+    main()
