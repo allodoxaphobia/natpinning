@@ -58,7 +58,7 @@ class Base(object):
 				cbsock.close()
 			except socket.error:
 				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort))
-		elif sType="ssh":
+		elif sType=="ssh":
 			try:
 				launchcmd=["ssh", "root@"+sIP, "-p", str(iPort)]
 				p = subprocess.Popen(launchcmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
