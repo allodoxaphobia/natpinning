@@ -8,6 +8,7 @@ import socket
 import time
 import contextlib
 import exceptions
+import subprocess
 
 class Base(object):
 	def __init__(self,sType, serverPort,sCallbackType):
@@ -56,6 +57,15 @@ class Base(object):
 				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort))
 				cbsock.close()
 			except socket.error:
+				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort))
+		elif sType="ssh":
+			try:
+				launchcmd=["ssh", "root@"+sIP, "-p", str(iPort)]
+				p = subprocess.Popen(launchcmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				print p.stdout.readline
+				p.close()
+				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort))
+			except:
 				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort))
 	#end def
 	def log(self, str):
