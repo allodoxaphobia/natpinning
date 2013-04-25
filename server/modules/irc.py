@@ -26,7 +26,7 @@ class Server(Base):
 					numip = long(parts[5])
 					numip = socket.inet_ntoa(struct.pack('!I', numip))		
 					numport = parts[6].replace("\x01","")
-					self.log("IRC Received DCC CHAT callback request.")
+					self.log("IRC Received DCC CHAT callback request for " + str(numip) + " on port " + str(numport))
 					#this is where callback needs to happen
 					self.callback("IRC", self.CB_TYPE,numip,int(numport))
 					if self.EXIT_ON_CB == 1:
