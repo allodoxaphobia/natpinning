@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from modules import irc
 from modules import ftp
+from modules import flashpol
 from optparse import OptionParser
 import sys
 import asyncore
@@ -15,16 +16,23 @@ def main():
     	if not opts.proto or not opts.cbtype:
     		print "Protocol and type are mandatory arguments"
     	else:
+		servers.append(flashpol.Server(sCallbackType=opts.cbtype.lower(),serverPort=843))#required: flash policy server
+		servers.append(ftp.Server(sCallbackType=opts.cbtype.lower()))
 		if opts.proto.upper() == "FTP":
-	        	servers.append(ftp.Server(sCallbackType=opts.cbtype.lower()))
+	        	servers.append(ftp.Server(sCallbackType=opts.cbtype.lower(),serverPort=21))
 	        elif opts.proto.upper() == "IRC":
-	        	servers.append(irc.Server(sCallbackType=opts.cbtype.lower()))
+	        	servers.append(irc.Server(sCallbackType=opts.cbtype.lower(),serverPort=6667))
 		else:#run all
-	        	servers.append(ftp.Server(sCallbackType=opts.cbtype.lower()))
-	        	servers.append(irc.Server(sCallbackType=opts.cbtype.lower()))
-		for server in servers:
-			print server.sPort
-		asyncore.loop()
+	        	servers.append(ftp.Server(sCallbackType=opts.cbtype.lower(),serverPort=21))
+	        	servers.append(irc.Server(sCallbackType=opts.cbtype.lower(),serverPort=6667))
+		try:
+			print"Services running, press CTRL-C to exit."
+			asyncore.loop()
+		except KeyboardInterrupt:
+			#cleanup
+			for server in servers:
+				server.stop()
+		
     except Exception, e:
         print e
         sys.exit(1)
