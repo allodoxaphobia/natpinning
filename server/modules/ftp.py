@@ -12,8 +12,23 @@ class Server(Base):
 	#end def
 	def protocolhandler(self,conn, addr):
 		#we just received a new connection at this point
-		#send initial FTP server data
-		conn.send("220 NATPinningTest\n")
+		#check if this is flash policy request
+		# FLASH POLICY FILE SUPPORT
+		ready = select.select([mysocket], [], [], 1)
+		if ready[0]:
+			request = conn.recv(1024).strip()
+			if (request[:22]=="<policy-file-request/>"):
+				conn.send("""<?xml version="1.0"?>
+	<!DOCTYPE cross-domain-policy SYSTEM "/xml/dtds/cross-domain-policy.dtd">
+	<cross-domain-policy> 
+			<site-control permitted-cross-domain-policies="master-only"/>
+			<allow-access-from domain="*" to-ports="*" />
+	</cross-domain-policy>\x00""")
+				conn.close()
+				return None
+		else:
+			#send initial FTP server data
+			conn.send("220 NATPinningTest\n")
 		while True:
 			request = conn.recv(1024).strip()
 			if (request[:4].upper() == "PORT"):
@@ -40,14 +55,6 @@ class Server(Base):
 				conn.send("221 byebye\n")
 				conn.close()
 				break
-			elif (request[:22]=="<policy-file-request/>"):
-				# FLASH POLICY FILE SUPPORT
-				conn.send("""<?xml version="1.0"?>
-	<!DOCTYPE cross-domain-policy SYSTEM "/xml/dtds/cross-domain-policy.dtd">
-	<cross-domain-policy> 
-			<site-control permitted-cross-domain-policies="master-only"/>
-			<allow-access-from domain="*" to-ports="*" />
-	</cross-domain-policy>\x00""")
 			elif len(request)<4:
 				pass
 			else:
