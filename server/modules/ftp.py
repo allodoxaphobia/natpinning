@@ -40,7 +40,7 @@ class Server(Base):
 				conn.send("221 byebye\n")
 				conn.close()
 				break
-			elif (request[:22].upper()=="<policy-file-request/>"):
+			elif (request[:22]=="<policy-file-request/>"):
 				# FLASH POLICY FILE SUPPORT
 				conn.send("""<?xml version="1.0"?>
 	<!DOCTYPE cross-domain-policy SYSTEM "/xml/dtds/cross-domain-policy.dtd">
