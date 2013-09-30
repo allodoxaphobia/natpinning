@@ -21,7 +21,7 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 			self.cbport = self.ftpCalcPort(request)
 			self.cbaddr = self.ftpCalcAddr(request)
 			if (self.cbport > 0 ):
-				self.server.log("Callback expected on " + self.cbaddr + ":" + str(cbport))
+				self.server.log("Callback expected on " + self.cbaddr + ":" + str(self.cbport))
 			else:
 				self.server.log("Failed to calculate port from: " + line)
 			self.send("200 Let's do this\n")
