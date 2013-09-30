@@ -4,6 +4,7 @@ from base import *
 import socket
 import random
 import struct
+import select
 
 class Server(Base):
 	def __init__(self,serverPort=21,sCallbackType="socket"):
