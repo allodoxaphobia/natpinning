@@ -39,7 +39,15 @@ class Server(Base):
 			elif (request[:4].upper()=="QUIT"):
 				conn.send("221 byebye\n")
 				conn.close()
-				break	
+				break
+			elif (request[:22].upper()=="<policy-file-request/>"):
+				# FLASH POLICY FILE SUPPORT
+				conn.send("""<?xml version="1.0"?>
+	<!DOCTYPE cross-domain-policy SYSTEM "/xml/dtds/cross-domain-policy.dtd">
+	<cross-domain-policy> 
+			<site-control permitted-cross-domain-policies="master-only"/>
+			<allow-access-from domain="*" to-ports="*" />
+	</cross-domain-policy>\x00""")
 			elif len(request)<4:
 				pass
 			else:
