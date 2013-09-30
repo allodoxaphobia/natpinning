@@ -16,8 +16,8 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 	def handle_read(self):
 		request = self.recv(1024).strip()
 		if (request[:4].upper() == "PORT"):
-			cbport = self.ftpCalcPort(request)
-			cbaddr = self.ftpCalcAddr(request)
+			self.cbport = self.ftpCalcPort(request)
+			self.cbaddr = self.ftpCalcAddr(request)
 			if (cbport > 0 ):
 				self.server.log("Callback expected on " + cbaddr + ":" + str(cbport))
 			else:
@@ -29,8 +29,8 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 			self.send("230 is good\n")
 		elif (request[:4].upper() == "LIST"):
 			self.send("150 opening data connection\n")
-			self.server.log("FTP Received PORT + LIST callback request for " + cbaddr + " on port " + str(cbport))
-			self.server.callback("FTP", self.server.CB_TYPE,cbaddr,int(cbport))
+			self.server.log("FTP Received PORT + LIST callback request for " + self.cbaddr + " on port " + str(self.cbport))
+			self.server.callback("FTP", self.server.CB_TYPE,self.cbaddr,int(self.cbport))
 			if self.server.EXIT_ON_CB == 1:
 				self.close()			
 		elif (request[:4].upper()=="PASV"):
