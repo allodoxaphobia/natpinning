@@ -63,6 +63,7 @@ class Base(asyncore.dispatcher):
 			except:
 				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort))
 		elif sType=="telnet":
+			try:
 				launchcmd=["telnet", sIP, str(iPort)]
 				p = subprocess.Popen(launchcmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				print p.stdout.readline
