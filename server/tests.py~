@@ -23,7 +23,9 @@ def main():
 	        	servers.append(ftp.Server(sCallbackType=opts.cbtype.lower()))
 	        	servers.append(irc.Server(sCallbackType=opts.cbtype.lower()))
 		while True:
-			pass
+			for server in servers:
+				print server.CB_TYPE
+				server.run()
     except Exception, e:
         print e
         sys.exit(1)

@@ -24,6 +24,7 @@ def main():
 	        	servers.append(irc.Server(sCallbackType=opts.cbtype.lower()))
 		while True:
 			for server in servers:
+				print server.sPort
 				server.run()
     except Exception, e:
         print e
