@@ -7,7 +7,7 @@ import sys
 
 def main():
     parser = OptionParser(usage = '%prog --proto=PROTOCOL --type=CALLBACK_TYPE')
-    parser.add_option('-p', '--proto', dest='proto', type=str, default="all" help='Protocol you wish to test: FTP, IRC')
+    parser.add_option('-p', '--proto', dest='proto', type=str, default="all", help='Protocol you wish to test: FTP, IRC')
     parser.add_option('-t', '--type', dest='cbtype', type=str, help='How do you wish to connect back to the client: socket, ssh, telnet')
     opts, args = parser.parse_args()
     try:
