@@ -19,6 +19,7 @@ class Server(Base):
 		if ready[0]:
 			request = conn.recv(1024).strip()
 			if (request[:22]=="<policy-file-request/>"):
+				self.log("FLASH policy file request")
 				conn.send("""<?xml version="1.0"?>
 	<!DOCTYPE cross-domain-policy SYSTEM "/xml/dtds/cross-domain-policy.dtd">
 	<cross-domain-policy> 
