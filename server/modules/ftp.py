@@ -14,7 +14,7 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort))
 		self.send("220 NATPinningTest\r\n")
 	def handle_read(self):
-		request = conn.recv(1024).strip()
+		request = self.recv(1024).strip()
 		if (request[:4].upper() == "PORT"):
 			cbport = self.ftpCalcPort(request)
 			cbaddr = self.ftpCalcAddr(request)
