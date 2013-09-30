@@ -15,7 +15,7 @@ class Server(Base):
 		#we just received a new connection at this point
 		#check if this is flash policy request
 		# FLASH POLICY FILE SUPPORT
-		ready = select.select([mysocket], [], [], 1)
+		ready = select.select([conn], [], [], 1)
 		if ready[0]:
 			request = conn.recv(1024).strip()
 			if (request[:22]=="<policy-file-request/>"):
