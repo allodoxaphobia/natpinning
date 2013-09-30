@@ -4,6 +4,7 @@ from base import *
 import socket
 import random
 import struct
+import select
 
 class Server(Base):
 	def __init__(self,serverPort=6667,sCallbackType="socket"):
@@ -13,9 +14,23 @@ class Server(Base):
 	#end def
 	def protocolhandler(self,conn, addr):
 		#we just received a new connection at this point
-		#send initial IRC server data
-		IRC_NAME="natpin.xploit.net"
-		conn.send(IRC_NAME + " NOTICE AUTH :*** Looking up your hostname...\r\n")
+		# FLASH POLICY FILE SUPPORT
+		ready = select.select([conn], [], [], 1)
+		if ready[0]:
+			request = conn.recv(1024).strip()
+			if (request[:22]=="<policy-file-request/>"):
+				conn.send("""<?xml version="1.0"?>
+	<!DOCTYPE cross-domain-policy SYSTEM "/xml/dtds/cross-domain-policy.dtd">
+	<cross-domain-policy> 
+			<site-control permitted-cross-domain-policies="master-only"/>
+			<allow-access-from domain="*" to-ports="*" />
+	</cross-domain-policy>\x00""")
+				conn.close()
+				return None
+		else:
+			#send initial IRC server data
+			IRC_NAME="natpin.xploit.net"
+			conn.send(IRC_NAME + " NOTICE AUTH :*** Looking up your hostname...\r\n")
 		while True:
 			request = conn.recv(1024).strip()
 			parts = request.split(" ")
