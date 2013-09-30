@@ -26,7 +26,7 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 				self.server.log("IRC Received DCC CHAT callback request for " + str(numip) + " on port " + str(numport))
 					#this is where callback needs to happen
 				self.server.callback("IRC", self.server.CB_TYPE,numip,int(numport))
-				if self.EXIT_ON_CB == 1:
+				if self.server.EXIT_ON_CB == 1:
 					self.close()
 			#end if
 		else:

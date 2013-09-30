@@ -31,7 +31,7 @@ class FTProtoHandler(asyncore.dispatcher_with_send):
 			self.send("150 opening data connection\n")
 			self.server.log("FTP Received PORT + LIST callback request for " + cbaddr + " on port " + str(cbport))
 			self.server.callback("FTP", self.server.CB_TYPE,cbaddr,int(cbport))
-			if self.EXIT_ON_CB == 1:
+			if self.server.EXIT_ON_CB == 1:
 				self.close()			
 		elif (request[:4].upper()=="PASV"):
 			pass #TODO			
