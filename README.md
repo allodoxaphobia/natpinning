@@ -1,57 +1,70 @@
-These are POC scripts to test natpinning on routers.
+NATpinning
+===============
+This tool is based of the original NAT pinning POC by Samy Kamkar: http://samy.pl/natpin/. 
+The original proof-of-concept provided by Samy was just that, a proof-of-concept, and has very little usefulness for penetration testers.
+This test suite should overcome this shortcoming as well as provide support for multiple protocols. It should also be more reliable then the original javascript published by Samy as it utilizes Flash sockets and therefor does not send additional, unwanted, data such as HTTP headers.
+We identified the need for this during manual testing as we found most connection tracking modules these days don't just look for a single line/command, but rely on several request/response pairs to identify valid traffic.
 
-Eventually these will be bundled into one tool that you can use to test all possible loaded helper 
-modules on a router to determine which ones are loaded.
-In a later stage basic tests will be performed to test the security implementation on the loaded modules:
-- e.g. does it trigger port forwarding after a single line
-- does it simply ignore invalid statements
-- does it trigger on procol  common ports (ftp:21, irc:667,etc) only, or does it work over additional ports
-- where ip's are specified in the protocol (i.e.: IRC), does it allow portforwarding to a third host
-- if it allows forwarding to a third host, does it allow forwarding to itself
-- are dangerous ports allowed
-- are the helpers security config parameters set correctly
+The test suite is currently still under development, but when finished should aid penetration testers in accuratly assessing the state of nf_conntrack 
+modules used by the router.
+The most common issues identified with these are:
+	- allowing port forwarding to a third host
+	- allowing port forwarding to reserved ports.
 
-The end goal would be to figure out which security risks might arise from the helper modules, most importantly:
-- can we open ports to the router itself
-- can it be exploited with a CSRF request
 
-The setup will allways be the same; client modules are loaded on a host on the target (NATted LAN), the server is set up on a remote server.
-Once the client and server are communicating and one of them triggers the nat pinning/port forwarding, an automatic connect test to the forwarded port will be made to validate wether the test was 
-succesfull.
 
-Credits: original NAT  pinning POC by Samy Kamkar: http://samy.pl/natpin/
+
+How it works
+============
+The suite consists of two different components, server and client. 
+
+The server is a python script which needs to be run from an Internet based host, with a public IP assigned to it and not firewalled. Once the script is running it will open dummy services (irc, ftp) and a flash policy server.
+
+The client is the combination of HTML, JavaScript and a AS3 (Actionscript 3) flash file. The exploit page and flash file are to be hosted on the same server as the server component.
+When the victim loads the exploit page, the flash file will connect to one of the exposed dummy services and a communication between them will ensue that should trigger the nf_conntrack modules on the victim's router to expose and forward additional ports, at which point the server component will attempt to connect to these additional exposed ports.
+
+
+
+ __________							________________
+ |Browser |<------ Victim loads exploit page ----------------- |                |
+ |   on   |======= Flash talks to dummy service =============> |EXPLOIT SERVER  |
+ | victim |<###### Router forwards additional ports #########> |                |
+ |   PC   |<-------Exploit server connects to forwarded port---|________________|
+/ -------- \
+____________
+
+
+Usage
+=====
+on the exploit server
+Copy the files exploit/exploit.html and exploit/exploit.swf to your web-root
+Then run the following command. Note that this must be run as root.
+$sudo server/tests.py
+
+
+Usage: tests.py --proto=PROTOCOL --type=CALLBACK_TYPE
+
+Options:
+  -h, --help            show this help message and exit
+  -p PROTO, --proto=PROTO
+                        Protocol you wish to test: FTP, IRC
+  -t CBTYPE, --type=CBTYPE
+                        How do you wish to connect back to the client: socket,
+                        ssh, telnet
+
+To run tests, naviguate the victim browser to http://exploit_server/rafsstuff/exploit.html?server=exploit_server&ci=192.168.0.156&cp=443&type=irc
+whereby
+	server: is the ip to which flash should connect
+	ci: the ip of the host you are trying to expose
+	cp: the port on host ci you are trying to gain access to
+	type: the protocol you want to use for the test (irc or ftp)
 
 
 Current status:
 ===============
-- a rough first IRC test is created, follows a fully correct IRC conversation up to a DCC chat request (DCC send will also be added)
-- a ftp server is created that supports natpinning test through PASV command and PORT command
-
-
-Usage: IRC
-============
-start up np_server_irc.py on the internet based host
-    Usage: np_server_irc.py
-then run np_client_irc.py on the host behind the NAT router (-h for help)
-    Usage: np_client_irc.py [options]
-
-Writing Protocol Classes: Clients
-===================================
-add a new class file to client/modules
-Make the class inherit Base and override the protocolhandler function
-
-the structure of your protocolhandler should be
-def protcolhandler(self):
-	while 1:
-		#do your thing here, at this point the callback port to test natpinning is already set up
-		#and you are connected to the remote server, so here you need to handle communications to your server
-		#the socket to do this on is self.sSock
-		pass
-	#end while
-#end def
-
-there are some test samples on how to address the classes in tests.py
-For examples of how to make your class, see the current classes in /client/modules
+The server tool currently supports:
+- the IRC protocol, nat pinning triggered through a DCC chat message
+- the FTP protocol,nat pinning triggered through the PORT command
 
 
 
