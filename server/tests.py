@@ -17,7 +17,6 @@ def main():
     		print "Protocol and type are mandatory arguments"
     	else:
 		servers.append(flashpol.Server(sCallbackType=opts.cbtype.lower(),serverPort=843))#required: flash policy server
-		servers.append(ftp.Server(sCallbackType=opts.cbtype.lower()))
 		if opts.proto.upper() == "FTP":
 	        	servers.append(ftp.Server(sCallbackType=opts.cbtype.lower(),serverPort=21))
 	        elif opts.proto.upper() == "IRC":

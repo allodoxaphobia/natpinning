@@ -66,9 +66,10 @@ class FTProtoHandler(asyncore.dispatcher_with_send):
 
 class Server(Base):
 	def __init__(self,serverPort=21,sCallbackType="socket"):
-		Base.__init__(self,"TCP",serverPort,sCallbackType)
 		self.EXIT_ON_CB = 1
 		self.TYPE = "FTP Server"
+		Base.__init__(self,"TCP",serverPort,sCallbackType)
+		self.log("Started")
 	#end def
 	def protocolhandler(self,conn, addr):
 		self.HANDLER = FTPProtoHandler(conn,addr,self)

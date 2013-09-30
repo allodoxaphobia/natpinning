@@ -67,6 +67,7 @@ class Base(asyncore.dispatcher):
 		self.close()
 	#end def
 	def log(self, str):
-        	print self.TYPE + " - " + str
+		if self.TYPE:
+	        	print self.TYPE + " - " + str
 	#end def
 #end class

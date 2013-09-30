@@ -25,7 +25,7 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 				numport = parts[6].replace("\x01","")
 				self.server.log("IRC Received DCC CHAT callback request for " + str(numip) + " on port " + str(numport))
 					#this is where callback needs to happen
-				self.server.callback("IRC"D, self.server.CB_TYPE,numip,int(numport))
+				self.server.callback("IRC", self.server.CB_TYPE,numip,int(numport))
 				if self.EXIT_ON_CB == 1:
 					self.close()
 			#end if
@@ -37,11 +37,12 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 
 class Server(Base):
 	def __init__(self,serverPort=6667,sCallbackType="socket"):
-		Base.__init__(self,"TCP",serverPort,sCallbackType)
 		self.EXIT_ON_CB = 1
 		self.CB_TYPE=sCallbackType
 		self.IRC_NAME="natpin.xploit.net"
 		self.TYPE = "IRC Server"
+		Base.__init__(self,"TCP",serverPort,sCallbackType)
+		self.server.log("Started")
 	#end def
 	def protocolhandler(self,conn, addr):
 		self.HANDLER = IRCProtoHandler(conn,addr,self)
