@@ -13,13 +13,15 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
 		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort))
 		self.send("220 NATPinningTest\r\n")
+		self.cbport=0
+		self.cbaddr=""
 	def handle_read(self):
 		request = self.recv(1024).strip()
 		if (request[:4].upper() == "PORT"):
 			self.cbport = self.ftpCalcPort(request)
 			self.cbaddr = self.ftpCalcAddr(request)
-			if (cbport > 0 ):
-				self.server.log("Callback expected on " + cbaddr + ":" + str(cbport))
+			if (self.cbport > 0 ):
+				self.server.log("Callback expected on " + self.cbaddr + ":" + str(cbport))
 			else:
 				self.server.log("Failed to calculate port from: " + line)
 			self.send("200 Let's do this\n")
