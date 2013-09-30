@@ -21,7 +21,6 @@ def main():
 	        		x = ftp.Server(sCallbackType=opts.cbtype.lower())
 	        	elif opts.proto.upper() == "IRC":
 	        		x = irc.Server(sCallbackType=opts.cbtype.lower())
-		while True:
 	        	x.run()
     except Exception, e:
         print e

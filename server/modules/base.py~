@@ -30,8 +30,9 @@ class Base(object):
 	
 	def run(self):
 		#try:
-		t = Thread(target=self.handler,args=(self.sock.accept()))
-		t.start()
+			while True:
+				t = Thread(target=self.handler,args=(self.sock.accept()))
+				t.start()
 		#except socket.error, e:
 		#	self.log('Error accepting connection: %s' % (e[1],))
 	#end def
