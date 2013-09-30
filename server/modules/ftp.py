@@ -7,7 +7,7 @@ import struct
 import select
 
 
-class FTProtoHandler(asyncore.dispatcher_with_send):
+class FTPProtoHandler(asyncore.dispatcher_with_send):
 	def __init__(self,conn_sock, client_address, server):
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
