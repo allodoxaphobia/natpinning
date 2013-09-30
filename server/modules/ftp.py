@@ -36,8 +36,8 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 		elif (request[:4].upper()=="PASV"):
 			pass #TODO			
 		elif (request[:4].upper()=="QUIT"):
-			conn.send("221 byebye\n")
-			conn.close()
+			self.send("221 byebye\n")
+			self.close()
 		elif len(request)<4:
 			pass
 		else:
