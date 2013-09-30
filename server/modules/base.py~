@@ -11,6 +11,7 @@ import exceptions
 import subprocess
 import asyncore
 
+
 class Base(asyncore.dispatcher):
 	def __init__(self,sType, serverPort,sCallbackType):
 		asyncore.dispatcher.__init__(self)
@@ -22,21 +23,23 @@ class Base(asyncore.dispatcher):
 			self.set_reuse_addr()
 	        except AttributeError:
             		# AttributeError catches Python built without IPv6
-            		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            		self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
 		except socket.error:
 			# socket.error catches OS with IPv6 disabled
-			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.bind(('', self.sPort))
 		self.listen(5)
 	#end def
 	
 	def handle_accept(self):
-		self.log("Received connection from " + addr[0])
-        	       self.protocolhandler(conn, addr)
+		pair = self.accept()
+		if pair is not None:
+			conn, addr = pair
+			self.protocolhandler(conn,addr)
+			
 	#end def
 	def protocolhandler(self,conn, addr):
 		pass
-		#OVERRIDE THIS FUNCTION
 	#end def
 	def callback(self,sProto,sType,sIP,iPort):
 		if sType == "socket":
@@ -60,7 +63,10 @@ class Base(asyncore.dispatcher):
 			except:
 				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort))
 	#end def
+	def stop(self):
+		self.close()
+	#end def
 	def log(self, str):
-        	print str
+        	print self.TYPE + " - " + str
 	#end def
 #end class
