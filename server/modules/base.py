@@ -9,38 +9,31 @@ import time
 import contextlib
 import exceptions
 import subprocess
+import asyncore
 
-class Base(object):
+class Base(asyncore.dispatcher):
 	def __init__(self,sType, serverPort,sCallbackType):
+		asyncore.dispatcher.__init__(self)
 		self.sPort = int(serverPort)
 		self.CB_TYPE=sCallbackType #socket, ssh, telnet TODO
 		if sType =="TCP" or sType == "UDP": self.pType = sType
         	try:
-	        	self.sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+	        	self.create_socket(socket.AF_INET6, socket.SOCK_STREAM)
+			self.set_reuse_addr()
 	        except AttributeError:
             		# AttributeError catches Python built without IPv6
             		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		except socket.error:
 			# socket.error catches OS with IPv6 disabled
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		self.sock.bind(('', self.sPort))
-		self.sock.listen(5)
+		self.bind(('', self.sPort))
+		self.listen(5)
 	#end def
 	
-	def run(self):
-		#try:
-		t = Thread(target=self.handler,args=(self.sock.accept()))
-		t.start()
-		#except socket.error, e:
-		#	self.log('Error accepting connection: %s' % (e[1],))
+	def handle_accept(self):
+		self.log("Received connection from " + addr[0])
+		self.protocolhandler(conn, addr)
 	#end def
-	def handler(self,conn, addr):
-		with contextlib.closing(conn):
-			self.log("Received connection from " + addr[0])
-        	       	self.protocolhandler(conn, addr)
-	#end def
-	
 	def protocolhandler(self,conn, addr):
 		pass
 		#OVERRIDE THIS FUNCTION

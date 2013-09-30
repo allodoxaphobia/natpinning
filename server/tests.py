@@ -3,7 +3,7 @@ from modules import irc
 from modules import ftp
 from optparse import OptionParser
 import sys
-
+import asyncore
 
 def main():
     parser = OptionParser(usage = '%prog --proto=PROTOCOL --type=CALLBACK_TYPE')
@@ -22,10 +22,9 @@ def main():
 		else:#run all
 	        	servers.append(ftp.Server(sCallbackType=opts.cbtype.lower()))
 	        	servers.append(irc.Server(sCallbackType=opts.cbtype.lower()))
-		while True:
-			for server in servers:
-				print server.sPort
-				server.run()
+		for server in servers:
+			print server.sPort
+		asyncore.loop()
     except Exception, e:
         print e
         sys.exit(1)
