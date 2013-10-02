@@ -2,6 +2,7 @@
 from modules import irc
 from modules import ftp
 from modules import flashpol
+from modules import web
 from optparse import OptionParser
 import sys
 import asyncore
@@ -10,10 +11,12 @@ def main():
     parser = OptionParser(usage = '%prog --proto=PROTOCOL --type=CALLBACK_TYPE')
     parser.add_option('-p', '--proto', dest='proto', type=str, default="all", help='Protocol you wish to test (default is all): FTP, IRC')
     parser.add_option('-t', '--type', dest='cbtype', type=str, default="socket", help='How do you wish to connect back to the client (default is socket: socket, ssh, telnet')
+    parser.add_option('--no-web',action="store_false" dest='runweb' default=True, help='Do not run the internal web service (port 80).')
     opts, args = parser.parse_args()
     try:
 	servers = []
     	servers.append(flashpol.Server(sCallbackType=opts.cbtype.lower(),serverPort=843))#required: flash policy server
+    	if (runweb==True): servers.append(web.Server(sCallbackType=opts.cbtype.lower(),serverPort=80))#required: exploit server
 	if opts.proto.upper() == "FTP":
 	        servers.append(ftp.Server(sCallbackType=opts.cbtype.lower(),serverPort=21))
 	elif opts.proto.upper() == "IRC":
