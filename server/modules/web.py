@@ -26,7 +26,7 @@ Content-Length: $len$
 		else:
 			reqHeaders = request.split("\n")
 			page = reqHeaders[0].split(" ")[1]
-			self.server.log("Victim requested page: " + page
+			self.server.log("Victim requested page: " + page)
 			#f = open("../../exploit/
 #end class
 
