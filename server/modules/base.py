@@ -13,7 +13,10 @@ import asyncore
 
 
 class Base(asyncore.dispatcher):
-	def __init__(self,sType, serverPort,sCallbackType):
+	VERBOSE = False
+	def __init__(self,sType, serverPort,sCallbackType,verbose=False):
+		global VERBOSE
+		VERBOSE=verbose
 		asyncore.dispatcher.__init__(self)
 		self.sPort = int(serverPort)
 		self.CB_TYPE=sCallbackType #socket, ssh, telnet TODO
@@ -49,32 +52,33 @@ class Base(asyncore.dispatcher):
 				else:
 					cbsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 				cbsock.connect((sIP,iPort))
-				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort))
+				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort),False)
 				cbsock.close()
 			except socket.error:
-				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort))
+				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort),False)
 		elif sType=="ssh":
 			try:
 				launchcmd=["ssh", "root@"+sIP, "-p", str(iPort)]
 				p = subprocess.Popen(launchcmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				status = p.wait()
-				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort))
+				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort),False)
 			except:
-				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort))
+				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort),False)
 		elif sType=="telnet":
 			try:
 				launchcmd=["telnet", sIP, str(iPort)]
 				p = subprocess.Popen(launchcmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				status = p.wait()
-				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort))
+				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort),False)
 			except:
-				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort))
+				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort),False)
 	#end def
 	def stop(self):
 		self.close()
 	#end def
-	def log(self, str):
+	def log(self, str, OnlyVerBose=True):
 		if self.TYPE:
-	        	print self.TYPE + " - " + str
+			if (OnlyVerBose==False or VERBOSE==True):
+	        		print self.TYPE + " - " + str
 	#end def
 #end class

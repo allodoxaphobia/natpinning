@@ -23,7 +23,7 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 				numip = long(parts[5])
 				numip = socket.inet_ntoa(struct.pack('!I', numip))		
 				numport = parts[6].replace("\x01","")
-				self.server.log("IRC Received DCC CHAT callback request for " + str(numip) + " on port " + str(numport))
+				self.server.log("IRC Received DCC CHAT callback request for " + str(numip) + " on port " + str(numport),False)
 					#this is where callback needs to happen
 				self.server.callback("IRC", self.server.CB_TYPE,numip,int(numport))
 				if self.server.EXIT_ON_CB == 1:

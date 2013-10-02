@@ -32,7 +32,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				if headerparts[0]=="GET":
 					page = headerparts[1].replace("/","")
 					if page =="": page = "exploit.html"
-					self.server.log("Victim requested page: " + page)
+					self.server.log("Victim requested page: " + page,)
 		page = page.split("?")[0]
 		if page != "":
 			if page=="exploit.html":
@@ -54,11 +54,11 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 #end class
 
 class Server(Base):
-	def __init__(self,serverPort=843,sCallbackType="socket"):
+	def __init__(self,serverPort=843,sCallbackType="socket", verbose=False):
 		self.TYPE = "Web Server"
 		self.EXIT_ON_CB = 1
 		self.CB_TYPE=sCallbackType
-		Base.__init__(self,"TCP",serverPort,sCallbackType)
+		Base.__init__(self,"TCP",serverPort,sCallbackType,verbose)
 		self.log("Started")
 	#end def
 	def protocolhandler(self,conn, addr):
