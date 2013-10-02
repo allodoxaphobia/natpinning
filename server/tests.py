@@ -17,7 +17,7 @@ def main():
     opts, args = parser.parse_args()
     try:
 	servers = []
-    	if (opts.runflash==True): sservers.append(flashpol.Server(sCallbackType=opts.cbtype.lower(),serverPort=843,verbose=opts.verbose))#required: flash policy server
+    	if (opts.runflash==True): servers.append(flashpol.Server(sCallbackType=opts.cbtype.lower(),serverPort=843,verbose=opts.verbose))#required: flash policy server
     	if (opts.runweb==True): servers.append(web.Server(sCallbackType=opts.cbtype.lower(),serverPort=80,verbose=opts.verbose))#required: exploit server
 	if opts.proto.upper() == "FTP":
 	        servers.append(ftp.Server(sCallbackType=opts.cbtype.lower(),serverPort=21,verbose=opts.verbose))
