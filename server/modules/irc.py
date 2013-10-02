@@ -36,12 +36,12 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 
 
 class Server(Base):
-	def __init__(self,serverPort=6667,sCallbackType="socket"):
+	def __init__(self,serverPort=6667,sCallbackType="socket", verbose=False):
 		self.EXIT_ON_CB = 1
 		self.CB_TYPE=sCallbackType
 		self.IRC_NAME="natpin.xploit.net"
 		self.TYPE = "IRC Server"
-		Base.__init__(self,"TCP",serverPort,sCallbackType)
+		Base.__init__(self,"TCP",serverPort,sCallbackType,verbose)
 		self.log("Started")
 	#end def
 	def protocolhandler(self,conn, addr):

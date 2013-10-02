@@ -27,11 +27,11 @@ class FPProtoHandler(asyncore.dispatcher_with_send):
 #end class
 
 class Server(Base):
-	def __init__(self,serverPort=843,sCallbackType="socket"):
+	def __init__(self,serverPort=843,sCallbackType="socket",verbose=False):
 		self.TYPE = "Flash Policy Server"
 		self.EXIT_ON_CB = 1
 		self.CB_TYPE=sCallbackType
-		Base.__init__(self,"TCP",serverPort,sCallbackType)
+		Base.__init__(self,"TCP",serverPort,sCallbackType,verbose)
 		self.log("Started")
 	#end def
 	def protocolhandler(self,conn, addr):
