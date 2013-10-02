@@ -12,21 +12,22 @@ def main():
     parser.add_option('-p', '--proto', dest='proto', type=str, default="all", help='Protocol you wish to test (default is all): FTP, IRC')
     parser.add_option('-t', '--type', dest='cbtype', type=str, default="socket", help='How do you wish to connect back to the client (default is socket: socket, ssh, telnet')
     parser.add_option('--no-web', action="store_false", dest='runweb', default=True, help='Do not run the internal web service (port 80).')
-    parser.add_option('-v', action="store_false", dest='runweb', default=True, help='Verbose, displays more information.')
+    parser.add_option('--no-flash', action="store_false", dest='runflash', default=True, help='Do not run the internal flash policy service (port 843).')
+    parser.add_option('-q', action="store_false", dest='verbose', default=True, help='Kill verbose output')
     opts, args = parser.parse_args()
     try:
 	servers = []
-    	servers.append(flashpol.Server(sCallbackType=opts.cbtype.lower(),serverPort=843))#required: flash policy server
-    	if (opts.runweb==True): servers.append(web.Server(sCallbackType=opts.cbtype.lower(),serverPort=80))#required: exploit server
+    	if (opts.runflash==True): sservers.append(flashpol.Server(sCallbackType=opts.cbtype.lower(),serverPort=843,verbose=opts.verbose))#required: flash policy server
+    	if (opts.runweb==True): servers.append(web.Server(sCallbackType=opts.cbtype.lower(),serverPort=80,verbose=opts.verbose))#required: exploit server
 	if opts.proto.upper() == "FTP":
-	        servers.append(ftp.Server(sCallbackType=opts.cbtype.lower(),serverPort=21))
+	        servers.append(ftp.Server(sCallbackType=opts.cbtype.lower(),serverPort=21,verbose=opts.verbose))
 	elif opts.proto.upper() == "IRC":
-		servers.append(irc.Server(sCallbackType=opts.cbtype.lower(),serverPort=6667))
+		servers.append(irc.Server(sCallbackType=opts.cbtype.lower(),serverPort=6667,verbose=opts.verbose))
 	else:#run all
-	        servers.append(ftp.Server(sCallbackType=opts.cbtype.lower(),serverPort=21))
-	        servers.append(irc.Server(sCallbackType=opts.cbtype.lower(),serverPort=6667))
+	        servers.append(ftp.Server(sCallbackType=opts.cbtype.lower(),serverPort=21,verbose=opts.verbose))
+	        servers.append(irc.Server(sCallbackType=opts.cbtype.lower(),serverPort=6667,verbose=opts.verbose))
 	try:
-		print"Services running, press CTRL-C to exit."
+		print "Services running, press CTRL-C to exit."
 		asyncore.loop()
 	except KeyboardInterrupt:
 		#cleanup
