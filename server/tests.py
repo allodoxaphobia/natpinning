@@ -19,13 +19,12 @@ def main():
 	servers = []
     	if (opts.runflash==True): servers.append(flashpol.Server(sCallbackType=opts.cbtype.lower(),serverPort=843,verbose=opts.verbose))#required: flash policy server
     	if (opts.runweb==True): servers.append(web.Server(sCallbackType=opts.cbtype.lower(),serverPort=80,verbose=opts.verbose))#required: exploit server
-	if opts.proto.upper() == "FTP":
+	if opts.proto.upper() == "FTP" or opts.proto.upper() == "ALL":
 	        servers.append(ftp.Server(sCallbackType=opts.cbtype.lower(),serverPort=21,verbose=opts.verbose))
-	elif opts.proto.upper() == "IRC":
+	elif opts.proto.upper() == "IRC" or opts.proto.upper() == "ALL":
 		servers.append(irc.Server(sCallbackType=opts.cbtype.lower(),serverPort=6667,verbose=opts.verbose))
-	else:#run all
-	        servers.append(ftp.Server(sCallbackType=opts.cbtype.lower(),serverPort=21,verbose=opts.verbose))
-	        servers.append(irc.Server(sCallbackType=opts.cbtype.lower(),serverPort=6667,verbose=opts.verbose))
+	elif opts.proto.upper() == "SIP" or opts.proto.upper() == "ALL":
+		servers.append(sip.Server(sCallbackType=opts.cbtype.lower(),serverPort=5060,verbose=opts.verbose))	
 	try:
 		print "Services running, press CTRL-C to exit."
 		asyncore.loop()
