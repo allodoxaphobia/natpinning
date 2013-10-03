@@ -6,4 +6,4 @@ sane project site: http://www.sane-project.org/contrib.html
 setup sane test suite: https://help.ubuntu.com/community/ScanningHowTo
 
 H323 http://en.wikipedia.org/wiki/H.323
-
+SANE http://webapp5.rrz.uni-hamburg.de/SuSe-Dokumentation/packages/sane-backends/sane.ps
