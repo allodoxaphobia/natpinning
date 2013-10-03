@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-from modules import irc
-from modules import ftp
-from modules import flashpol
-from modules import web
+from modules import *
 from optparse import OptionParser
 import sys
 import asyncore
