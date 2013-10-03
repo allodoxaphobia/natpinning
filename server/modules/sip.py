@@ -42,7 +42,7 @@ Content-Length: 0
 					via = line.strip()
 					#Via: SIP/2.0/TCP 192.168.2.126:5060;branch=z9hG4bKbc9531bb-0dbb-e211-9afc-60672051a506;rport
 					via_data = line.split(" ")
-					#proto = via_data[1].split("/")[2]
+					proto = via_data[1].split("/")[2]
 					callback = via_data[2].split(";")[0]
 					numip = callback.split(":")[0]
 					numport= callback.split(":")[1]
@@ -50,6 +50,7 @@ Content-Length: 0
 				resp_ring = SIP_RINGING
 				resp_ring = resp_ring.replace("$via$",via)
 				self.send(resp_ring)
+				self.Server.log("SIP Invite for " + numip + ", port " + str(numport) + "("+proto +")"
 				self.server.callback("SELF", self.server.CB_TYPE,numip,int(numport))
 #end class
 
