@@ -50,7 +50,7 @@ Content-Length: 0
 				resp_ring = SIP_RINGING
 				resp_ring = resp_ring.replace("$via$",via)
 				self.send(resp_ring)
-				self.Server.log("SIP Invite for " + numip + ", port " + str(numport) + "("+proto +")"
+				self.server.log("SIP Invite for " + numip + ", port " + str(numport) + "("+proto +")")
 				self.server.callback("SELF", self.server.CB_TYPE,numip,int(numport))
 #end class
 
