@@ -19,10 +19,8 @@ From: "NatPINr" ;tag=eihgg
 To: 
 Call-ID: hfxsabthoymshub@backtrack
 CSeq: 650 INVITE 
-
 User-Agent: Asterisk PBX
 Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY 
-
 Supported: replaces
 Contact: 
 Content-Length: 0
