@@ -47,17 +47,17 @@ Usage: tests.py --proto=PROTOCOL --type=CALLBACK_TYPE
 Options:
   -h, --help            show this help message and exit
   -p PROTO, --proto=PROTO
-                        Protocol you wish to test: FTP, IRC
+                        Protocol you wish to test: FTP, IRC, SIP (default is all)
   -t CBTYPE, --type=CBTYPE
                         How do you wish to connect back to the client: socket,
-                        ssh, telnet
+                        ssh, telnet, none
 
 To run tests, naviguate the victim browser to http://exploit_server/rafsstuff/exploit.html?server=exploit_server&ci=192.168.0.156&cp=443&type=irc
 whereby
 	server: is the ip to which flash should connect
 	ci: the ip of the host you are trying to expose
 	cp: the port on host ci you are trying to gain access to
-	type: the protocol you want to use for the test (irc or ftp)
+	type: the protocol you want to use for the test (irc, ftp or sip, default is all)
 
 
 Current status:
@@ -65,6 +65,7 @@ Current status:
 The server tool currently supports:
 - the IRC protocol, nat pinning triggered through a DCC chat message
 - the FTP protocol,nat pinning triggered through the PORT command
+- the SIP protocol, nat pinning triggered through a REGISTER message (opens UDP port)
 
 
 
