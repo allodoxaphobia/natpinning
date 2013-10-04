@@ -64,7 +64,7 @@ Content-Length: 0
 				self.server.log("SIP Invite for " + numip + ", port " + str(numport) + "("+proto +")")
 				self.server.callback("SIP", self.server.CB_TYPE,numip,int(numport))
 	#end def
-	def handle_REGISTER(self, data)#UDP ONLY???
+	def handle_REGISTER(self, data):#UDP ONLY???
 		via = ""
 		seq = ""
 		remhost = ""
