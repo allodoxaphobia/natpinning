@@ -12,57 +12,9 @@ import time
 class SIPProtoHandler(asyncore.dispatcher_with_send):
 	SIP_RINGING =""
 	def __init__(self,conn_sock, client_address, server):
-		global SIP_RINGING
-		SIP_RINGING="""SIP/2.0 100 Trying
-$via$
-From: "NatPINr" ;tag=eihgg
-To: 
-Call-ID: hfxsabthoymshub@backtrack
-CSeq: 650 INVITE 
-User-Agent: Asterisk PBX
-Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY 
-Supported: replaces
-Contact: 
-Content-Length: 0
-
-SIP/2.0 180 Ringing
-$via$
-From: "NatPINr" ;tag=eihgg
-To: 
-Call-ID: hfxsabthoymshub@backtrack
-CSeq: 6500 INVITE
-Contact: <sip:grmwl@192.168.2.126:5060;transport=TCP>
-User-Agent: Linphone/3.5.2 (eXosip2/3.6.0)
-Content-Length: 0
-
-"""
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
 		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort))
-	def handle_read(self):
-		global SIP_RINGING
-		data = self.recv(1024)
-		if data !="":
-			via = ""
-			lines = data.split("\n")
-			if "REGISTER" in lines[0]: handle_REGISTER(lines)
-			elif "INVITE" in lines[0]: self.server.log("RECEIVED INVITE")
-			return #temp bypass below code
-			for line in lines:
-				if "Via:" in line:
-					via = line.strip()
-					#Via: SIP/2.0/TCP 192.168.2.126:5060;branch=z9hG4bKbc9531bb-0dbb-e211-9afc-60672051a506;rport
-					via_data = line.split(" ")
-					proto = via_data[1].split("/")[2]
-					callback = via_data[2].split(";")[0]
-					numip = callback.split(":")[0]
-					numport= callback.split(":")[1]
-			if via != "":
-				resp_ring = SIP_RINGING
-				resp_ring = resp_ring.replace("$via$",via)
-				self.send(resp_ring)
-				self.server.log("SIP Invite for " + numip + ", port " + str(numport) + "("+proto +")")
-				self.server.callback("SIP", self.server.CB_TYPE,numip,int(numport))
 	#end def
 	def handle_REGISTER(self, data):#UDP ONLY???
 		via = ""
@@ -82,7 +34,7 @@ Server:  NATPIN
 Content-Length: 0
 
 """
-		for line in lines:
+		for line in data:
 			if "Via:" in line:
 				via = line.strip()
 				via_data = line.split(" ")
@@ -90,11 +42,11 @@ Content-Length: 0
 				remhost = callback.split(":")[0]
 				remport= callback.split(":")[1]
 			if "CSeq:" in line:
-				seq = line.toUpper().replace("CSEQ: ","")
+				seq = line.upper().replace("CSEQ: ","")
 			if "Call-ID:" in line:
-				callid = line.toUpper().replace("CALL-ID: ","")
+				callid = line.upper().replace("CALL-ID: ","")
 		if via!= "" and seq !="" and callid != "":
-			self.server.log("SIP REGISTER callback (UDP) received for " + remhost + " on port " + remport
+			self.server.log("SIP REGISTER callback (UDP) received for " + remhost + " on port " + remport)	
 			retpack = response
 			retpack = retpack.replace("$seq$",seq)
 			retpack = retpack.replace("$ip$",remhost)
@@ -103,10 +55,20 @@ Content-Length: 0
 			self.send(retpack)
 		else:
 			self.server.log("Received invalid REGISTER request")
+			print data
+	#end def
+	def handle_read(self):
+		data = self.recv(4096)
+		if data !="":
+			via = ""
+			lines = data.split("\n")
+			if "REGISTER" in lines[0]: self.handle_REGISTER(lines)
+			elif "INVITE" in lines[0]: self.server.log("RECEIVED INVITE")
+	#end def
 #end class
 
 class Server(Base):
-	def __init__(self,serverPort=843,sCallbackType="socket", verbose=False):
+	def __init__(self,serverPort=5060,sCallbackType="socket", verbose=False):
 		self.TYPE = "SIP Server"
 		self.EXIT_ON_CB = 1
 		self.CB_TYPE=sCallbackType
