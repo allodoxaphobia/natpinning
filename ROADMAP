@@ -1,0 +1,12 @@
+1) make server tool work in two different operations
+ -automated test mode
+        * will most likely require commmand channel between client and server
+        * going to be flash as well, or use python client for this?
+ -exploit mode
+ 
+ Should they really be mutually exclusive? PErhaps add option to test mode which asks user wether he wants to connect back to the port?
+ 
+ 
+2) Add more protocols / types per protocol (where aplicable)
+
+ 
