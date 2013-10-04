@@ -10,7 +10,6 @@ import select
 import time
 
 class SIPProtoHandler(asyncore.dispatcher_with_send):
-	SIP_RINGING =""
 	def __init__(self,conn_sock, client_address, server):
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
@@ -53,9 +52,12 @@ Content-Length: 0
 			retpack = retpack.replace("$port$",remport)
 			retpack = retpack.replace("$seq$",seq)
 			self.send(retpack)
+			#XXX TODO Validate wether onlu UDP is supported, 
+			#I deduced this from line 1096 in http://www.cs.fsu.edu/~baker/devices/lxr/http/source/linux/net/netfilter/nf_conntrack_sip.c, 
+			#but could be wrong 
+			self.server.callback("SIP REGISTER", "none",remhost,int(remport),self.getpeername())
 		else:
 			self.server.log("Received invalid REGISTER request")
-			print data
 	#end def
 	def handle_read(self):
 		data = self.recv(4096)

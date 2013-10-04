@@ -44,7 +44,12 @@ class Base(asyncore.dispatcher):
 	def protocolhandler(self,conn, addr):
 		pass
 	#end def
-	def callback(self,sProto,sType,sIP,iPort):
+	def callback(self,sProto,sType,sIP,iPort,remote_peer):
+		if sIP in remote_peer[0]:
+			#the fact that the callback ip was translated by the victim's router to reflect the public IP
+			# is a dead-sure indication that nat-pinning worked
+			#doesn't mean that it's exploitable as their might be infrastructure filtering.
+			self.log(" : nf_contrack fired on " + sIP)
 		if sType == "socket":
 			try:
 				if ":" in sIP:
@@ -72,6 +77,20 @@ class Base(asyncore.dispatcher):
 				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort),False)
 			except:
 				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort),False)
+		elif sType=="usocket": #UDP socket
+			try:
+				if ":" in sIP:
+					cbsock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+				else:
+					cbsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+				cbsock.sendto("ping\r\n", (sIP,iPort))
+				#XXX TODO Of course this doesn't guarantee AT ALL that data was received at other end
+				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort) + " (UDP)",False)
+				cbsock.close()
+			except socket.error:
+				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort)+ " (UDP)",False)
+		else:
+			return
 	#end def
 	def stop(self):
 		self.close()
