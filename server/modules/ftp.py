@@ -26,6 +26,9 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 				self.server.log("Failed to calculate port from: " + line)
 			self.send("200 Let's do this\n")
 		elif (request[:4].upper() == "USER"):
+			parts = request.split(" ")
+			self.server.VICTIMID = parts[1]
+			print "WOETWOET " + self.server.VICTIMID
 			self.send("331 user ok, need pass\n")
 		elif (request[:4].upper() == "PASS"):
 			self.send("230 is good\n")

@@ -4,6 +4,7 @@ from modules import ftp
 from modules import flashpol
 from modules import web
 from modules import sip
+from modules import cmd
 from optparse import OptionParser
 import sys
 import asyncore
@@ -18,6 +19,7 @@ def main():
     opts, args = parser.parse_args()
     try:
 	servers = []
+	servers.append(cmd.Server(sCallbackType=opts.cbtype.lower(),serverPort=60003,verbose=opts.verbose))
     	if (opts.runflash==True): servers.append(flashpol.Server(sCallbackType=opts.cbtype.lower(),serverPort=843,verbose=opts.verbose))#required: flash policy server
     	if (opts.runweb==True): servers.append(web.Server(sCallbackType=opts.cbtype.lower(),serverPort=80,verbose=opts.verbose))#required: exploit server
 	if opts.proto.upper() == "FTP" or opts.proto.upper() == "ALL":

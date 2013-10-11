@@ -14,6 +14,7 @@ import asyncore
 
 class Base(asyncore.dispatcher):
 	VERBOSE = False
+	VICTIMID = ""
 	def __init__(self,sType, serverPort,sCallbackType,verbose=False):
 		global VERBOSE
 		VERBOSE=verbose
@@ -45,11 +46,12 @@ class Base(asyncore.dispatcher):
 		pass
 	#end def
 	def callback(self,sProto,sType,sIP,iPort,remote_peer):
+		global VICTIMID
 		if sIP in remote_peer[0]:
 			#the fact that the callback ip was translated by the victim's router to reflect the public IP
 			# is a dead-sure indication that nat-pinning worked
 			#doesn't mean that it's exploitable as their might be infrastructure filtering.
-			self.log(" : nf_contrack fired on " + sIP)
+			self.log(" : nf_contrack_" + sProto + " fired on client: " + self.VICTIMID + " ip: "  + sIP)
 		if sType == "socket":
 			try:
 				if ":" in sIP:
