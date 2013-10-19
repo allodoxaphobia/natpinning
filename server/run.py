@@ -92,7 +92,7 @@ class Shell():
 				#run all proto tests
 				victim.TESTS.append("FTP " +  ip + " " + str(port))
 				victim.TESTS.append("IRC " +  ip + " " + str(port))
-				#victim.TESTS.append("SIP " +  ip + " " + str(port))
+				victim.TESTS.append("SIP " +  ip + " " + str(port))
 	def handleCmd_list(self, item):
 		if item.upper()=="CLIENTS":
 			victims = self.getVictims() # refresh list
@@ -144,7 +144,7 @@ class Shell():
 #end class
 
 class Engine():
-	VERBOSITY = 1
+	VERBOSITY = 0
 	LOGTYPE = "screen"
 	SERVERS = []
 	SERVICE_THREAD = None
@@ -152,7 +152,7 @@ class Engine():
 	RULES = []
 	def __init__(self, verbosity=0, logType="screen"):
 		global VERBOSITY, LOGTYPE
-		VERBOSITY = verbosity
+		self.VERBOSITY = verbosity
 		LOGTYPE = logType #either "screen" or filename
 	#end def
 	
