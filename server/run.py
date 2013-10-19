@@ -104,9 +104,9 @@ class Engine():
 	#end def
 	def callback(self, host, port, proto):
 		if ip.isPrivateAddress(host)==True:
-			print "Can't perform callback on private ip " + host
+			print "NATPIN FAILED : received private IP " + host
 		else:
-			print "Todo: actuially call back"
+			print "NATPIN SUCCES : victim exposed port " + str(port) + " on IP " + host
 	#end def
 	def runServers(self,runCMD,runWeb, runFlash, proto="ALL"):
 		global SERVERS, SERVICE_THREAD
