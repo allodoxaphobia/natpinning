@@ -64,7 +64,7 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 						test = "NONE"
 					else:
 						test = vic.TESTS[0]
-						vic.TESTS.remove(test)
+						vic.TESTS = vic.TESTS[1:]
 						test = "TEST " + test
 					break
 		return test
