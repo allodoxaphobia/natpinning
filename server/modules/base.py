@@ -13,15 +13,19 @@ import asyncore
 
 
 class Base(asyncore.dispatcher):
-	VERBOSE = False
 	VICTIMID = ""
-	def __init__(self,sType, serverPort,sCallbackType,verbose=False):
-		global VERBOSE
-		VERBOSE=verbose
+	CALLER = None
+	HANDLER = None
+	PTYPE = ""
+	def __init__(self,sType, serverPort,caller):
+		#caller is the calling object, this has to be of a class that supports the following methods
+		#log(string, loglevel)
+		#callback(host,port, proto) whereby proto is TCP or UDP
+		global CALLER, PTYPE
+		self.CALLER = caller
 		asyncore.dispatcher.__init__(self)
 		self.sPort = int(serverPort)
-		self.CB_TYPE=sCallbackType #socket, ssh, telnet TODO
-		if sType =="TCP" or sType == "UDP": self.pType = sType
+		if sType =="TCP" or sType == "UDP": self.PTYPE = sType
         	try:
 	        	self.create_socket(socket.AF_INET6, socket.SOCK_STREAM)
 			self.set_reuse_addr()
@@ -45,61 +49,10 @@ class Base(asyncore.dispatcher):
 	def protocolhandler(self,conn, addr):
 		pass
 	#end def
-	def callback(self,sProto,sType,sIP,iPort,remote_peer):
-		global VICTIMID
-		if sIP in remote_peer[0]:
-			#the fact that the callback ip was translated by the victim's router to reflect the public IP
-			# is a dead-sure indication that nat-pinning worked
-			#doesn't mean that it's exploitable as their might be infrastructure filtering.
-			self.log(" : nf_contrack_" + sProto + " fired on client: " + self.VICTIMID + " ip: "  + sIP)
-		if sType == "socket":
-			try:
-				if ":" in sIP:
-					cbsock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-				else:
-					cbsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-				cbsock.connect((sIP,iPort))
-				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort),False)
-				cbsock.close()
-			except socket.error:
-				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort),False)
-		elif sType=="ssh":
-			try:
-				launchcmd=["ssh", "root@"+sIP, "-p", str(iPort)]
-				p = subprocess.Popen(launchcmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-				status = p.wait()
-				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort),False)
-			except:
-				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort),False)
-		elif sType=="telnet":
-			try:
-				launchcmd=["telnet", sIP, str(iPort)]
-				p = subprocess.Popen(launchcmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-				status = p.wait()
-				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort),False)
-			except:
-				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort),False)
-		elif sType=="usocket": #UDP socket
-			try:
-				if ":" in sIP:
-					cbsock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
-				else:
-					cbsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-				cbsock.sendto("ping\r\n", (sIP,iPort))
-				#XXX TODO Of course this doesn't guarantee AT ALL that data was received at other end
-				self.log(sProto + ": Callback success on: " + sIP + " port " +str(iPort) + " (UDP)",False)
-				cbsock.close()
-			except socket.error:
-				self.log(sProto + ": Callback failed on: " + sIP + " port " +str(iPort)+ " (UDP)",False)
-		else:
-			return
-	#end def
 	def stop(self):
 		self.close()
 	#end def
-	def log(self, str, OnlyVerBose=True):
-		if self.TYPE:
-			if (OnlyVerBose==False or VERBOSE==True):
-	        		print self.TYPE + " - " + str
+	def log(self,value,logLevel):
+		self.CALLER.log(self.TYPE + " : " + value,logLevel)
 	#end def
 #end class

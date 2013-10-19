@@ -11,7 +11,7 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 	def __init__(self,conn_sock, client_address, server):
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
-		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort))
+		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort),1)
 		self.send("220 NATPinningTest\r\n")
 		self.cbport=0
 		self.cbaddr=""
@@ -21,9 +21,9 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 			self.cbport = self.ftpCalcPort(request)
 			self.cbaddr = self.ftpCalcAddr(request)
 			if (self.cbport > 0 ):
-				self.server.log("Callback expected on " + self.cbaddr + ":" + str(self.cbport))
+				self.server.log("Callback expected on " + self.cbaddr + ":" + str(self.cbport),1)
 			else:
-				self.server.log("Failed to calculate port from: " + line)
+				self.server.log("Failed to calculate port from: " + line,0)
 			self.send("200 Let's do this\n")
 		elif (request[:4].upper() == "USER"):
 			parts = request.split(" ")
@@ -34,10 +34,8 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 			self.send("230 is good\n")
 		elif (request[:4].upper() == "LIST"):
 			self.send("150 opening data connection\n")
-			self.server.log("FTP Received PORT + LIST callback request for " + self.cbaddr + " on port " + str(self.cbport),False)
-			self.server.callback("FTP PORT", self.server.CB_TYPE,self.cbaddr,int(self.cbport),self.getpeername())
-			if self.server.EXIT_ON_CB == 1:
-				self.close()			
+			self.server.log("FTP Received PORT + LIST callback request for " + self.cbaddr + " on port " + str(self.cbport),2)
+			self.server.CALLER.callback(self.cbaddr,int(self.cbport),"TCP")		
 		elif (request[:4].upper()=="PASV"):
 			pass #TODO			
 		elif (request[:4].upper()=="QUIT"):
@@ -70,11 +68,10 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 
 
 class Server(Base):
-	def __init__(self,serverPort=21,sCallbackType="socket",verbose=False):
-		self.EXIT_ON_CB = 1
+	def __init__(self,serverPort=21,caller=None):
 		self.TYPE = "FTP Server"
-		Base.__init__(self,"TCP",serverPort,sCallbackType, verbose)
-		self.log("Started")
+		Base.__init__(self,"TCP",serverPort,caller)
+		self.log("Started",0)
 	#end def
 	def protocolhandler(self,conn, addr):
 		self.HANDLER = FTPProtoHandler(conn,addr,self)

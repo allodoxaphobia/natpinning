@@ -10,7 +10,7 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 	def __init__(self,conn_sock, client_address, server):
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
-		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort))
+		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort),0)
 		self.send(self.server.IRC_NAME + " NOTICE AUTH :*** Looking up your hostname...\r\n")
 	def handle_read(self):
 		request = self.recv(1024).strip()
@@ -23,11 +23,9 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 				numip = long(parts[5])
 				numip = socket.inet_ntoa(struct.pack('!I', numip))		
 				numport = parts[6].replace("\x01","")
-				self.server.log("IRC Received DCC CHAT callback request for " + str(numip) + " on port " + str(numport),False)
+				self.server.log("IRC Received DCC CHAT callback request for " + str(numip) + " on port " + str(numport),2)
 					#this is where callback needs to happen
-				self.server.callback("IRC DCC CHAT", self.server.CB_TYPE,numip,int(numport),self.getpeername())
-				if self.server.EXIT_ON_CB == 1:
-					self.close()
+				self.server.CALLER.callback(numip,int(numport),"TCP")
 			#end if
 		else:
 			self.server.log("Invalid input :" + request)
@@ -36,13 +34,11 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 
 
 class Server(Base):
-	def __init__(self,serverPort=6667,sCallbackType="socket", verbose=False):
-		self.EXIT_ON_CB = 1
-		self.CB_TYPE=sCallbackType
+	def __init__(self,serverPort=6667,caller=None):
 		self.IRC_NAME="natpin.xploit.net"
 		self.TYPE = "IRC Server"
-		Base.__init__(self,"TCP",serverPort,sCallbackType,verbose)
-		self.log("Started")
+		Base.__init__(self,"TCP",serverPort,caller)
+		self.log("Started",0)
 	#end def
 	def protocolhandler(self,conn, addr):
 		self.HANDLER = IRCProtoHandler(conn,addr,self)

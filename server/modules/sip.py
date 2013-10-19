@@ -13,7 +13,7 @@ class SIPProtoHandler(asyncore.dispatcher_with_send):
 	def __init__(self,conn_sock, client_address, server):
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
-		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort))
+		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort),1)
 	#end def
 	def handle_REGISTER(self, data):#UDP ONLY???
 		via = ""
@@ -45,19 +45,19 @@ Content-Length: 0
 			if "Call-ID:" in line:
 				callid = line.upper().replace("CALL-ID: ","")
 		if via!= "" and seq !="" and callid != "":
-			self.server.log("SIP REGISTER callback (UDP) received for " + remhost + " on port " + remport)	
+			self.server.log("SIP REGISTER callback (UDP) received for " + remhost + " on port " + remport,2)	
 			retpack = response
 			retpack = retpack.replace("$seq$",seq)
 			retpack = retpack.replace("$ip$",remhost)
 			retpack = retpack.replace("$port$",remport)
 			retpack = retpack.replace("$seq$",seq)
 			self.send(retpack)
-			#XXX TODO Validate wether onlu UDP is supported, 
+			#XXX TODO Validate wether only UDP is supported, 
 			#I deduced this from line 1096 in http://www.cs.fsu.edu/~baker/devices/lxr/http/source/linux/net/netfilter/nf_conntrack_sip.c, 
 			#but could be wrong 
-			self.server.callback("SIP REGISTER", "none",remhost,int(remport),self.getpeername())
+			self.server.CALLER.callback(remhost,int(remport),"UDP")
 		else:
-			self.server.log("Received invalid REGISTER request")
+			self.server.log("Received invalid REGISTER request",0)
 	#end def
 	def handle_read(self):
 		data = self.recv(4096)
@@ -70,12 +70,10 @@ Content-Length: 0
 #end class
 
 class Server(Base):
-	def __init__(self,serverPort=5060,sCallbackType="socket", verbose=False):
+	def __init__(self,serverPort=5060,caller=None):
 		self.TYPE = "SIP Server"
-		self.EXIT_ON_CB = 1
-		self.CB_TYPE=sCallbackType
-		Base.__init__(self,"TCP",serverPort,sCallbackType,verbose)
-		self.log("Started")
+		Base.__init__(self,"TCP",serverPort,caller)
+		self.log("Started",0)
 	#end def
 	def protocolhandler(self,conn, addr):
 		self.HANDLER = SIPProtoHandler(conn,addr,self)

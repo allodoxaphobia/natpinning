@@ -20,7 +20,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		REQHEADER = ""
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
-		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort))
+		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort),1)
 	def handle_read(self):
 		global REQPAGE, REQHEADER, REQHEADERDONE
 		data = self.recv(1024)
@@ -32,7 +32,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				if headerparts[0]=="GET":
 					page = headerparts[1].replace("/","")
 					if page =="": page = "exploit.html"
-					self.server.log("Victim requested page: " + page,)
+					self.server.log("Victim requested page: " + page,0)
 		page = page.split("?")[0]
 		if page != "":
 			if page=="exploit.html":
@@ -54,12 +54,10 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 #end class
 
 class Server(Base):
-	def __init__(self,serverPort=843,sCallbackType="socket", verbose=False):
+	def __init__(self,serverPort=843, caller=None):
 		self.TYPE = "Web Server"
-		self.EXIT_ON_CB = 1
-		self.CB_TYPE=sCallbackType
-		Base.__init__(self,"TCP",serverPort,sCallbackType,verbose)
-		self.log("Started")
+		Base.__init__(self,"TCP",serverPort,caller)
+		self.log("Started",0)
 	#end def
 	def protocolhandler(self,conn, addr):
 		# FLASH POLICY FILE SUPPORT
