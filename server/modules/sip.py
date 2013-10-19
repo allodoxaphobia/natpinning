@@ -55,7 +55,7 @@ Content-Length: 0
 			#XXX TODO Validate wether only UDP is supported, 
 			#I deduced this from line 1096 in http://www.cs.fsu.edu/~baker/devices/lxr/http/source/linux/net/netfilter/nf_conntrack_sip.c, 
 			#but could be wrong 
-			self.server.CALLER.callback(remhost,int(remport),"UDP")
+			self.server.CALLER.callback(remhost,int(remport),"UDP","SIP REGISTER")
 		else:
 			self.server.log("Received invalid REGISTER request",0)
 	#end def

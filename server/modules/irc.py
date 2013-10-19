@@ -25,7 +25,7 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 				numport = parts[6].replace("\x01","")
 				self.server.log("IRC Received DCC CHAT callback request for " + str(numip) + " on port " + str(numport),2)
 					#this is where callback needs to happen
-				self.server.CALLER.callback(numip,int(numport),"TCP")
+				self.server.CALLER.callback(numip,int(numport),"TCP", "IRC DCC CHAT")
 			#end if
 		else:
 			self.server.log("Invalid input :" + request)

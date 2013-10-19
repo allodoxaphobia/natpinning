@@ -47,7 +47,7 @@ class Shell():
 		if len(parts)==1:
 			print "Available Commands:"
 			print "   help\t\tPrints this message"
-			print "   list\t\tlist items, expects list to display; victims, services, Connectors"
+			print "   list\t\tlist items, expects list to display; clientss, services, Connectors"
 			print "   \t\tType help list for more information."
 			print "   test\t\tTest natpinning. Command format: test id PROTO IP PORT"
 			print "   \t\tType help test for more information."
@@ -60,7 +60,7 @@ class Shell():
 			if parts[1].upper()=="TEST":
 				print ""
 				print ""
-				print "Test: The test command is the bread and butter of this tool, it instructs a victim to perform a natpin test."
+				print "Test: The test command is the bread and butter of this tool, it instructs a client to perform a natpin test."
 				print "Format: test ID PROTOCOL HOST PORT"
 				print "ID: The list id of the victim you wish to test (0,1,2,..."
 				print "PROTOCOL: The protocol you wish to test, FTP, IRC, SIP"
@@ -72,12 +72,12 @@ class Shell():
 				print "todo"
 			elif parts[1].upper()=="LIST":
 				print "List: The list command lists objects currently loaded."
-				print "   list victims\t\tLists all victims connected to the server."
+				print "   list clientss\t\tLists all clients connected to the server."
 				print "   list services\tLists all running services."
 				print "   list connectors\tLists all succesfully exposed endpoints."
 				
 	def handleCmd_test(self, args):
-		format ="test VICTIM_ID PROTO IP PORT"
+		format ="test Client_ID PROTO IP PORT"
 		if len(args) != 5:
 			print "invalid command format, expected : " + format
 		else:
@@ -86,9 +86,15 @@ class Shell():
 			ip = args[3]
 			port = args[4]
 			victim = self.getVictimById(vic_id)
-			victim.TESTS.append(proto + " " +  ip + " " + str(port))
+			if proto != "ALL":
+				victim.TESTS.append(proto + " " +  ip + " " + str(port))
+			else:
+				#run all proto tests
+				victim.TESTS.append("FTP " +  ip + " " + str(port))
+				victim.TESTS.append("IRC " +  ip + " " + str(port))
+				#victim.TESTS.append("SIP " +  ip + " " + str(port))
 	def handleCmd_list(self, item):
-		if item.upper()=="VICTIMS":
+		if item.upper()=="CLIENTS":
 			victims = self.getVictims() # refresh list
 			x = 0
 			for victim in victims:
@@ -102,13 +108,13 @@ class Shell():
 				x=x+1
 		elif item.upper() =="CONNECTORS":
 			print "Connectors:"
-			print "\tIP\t\tPORT\t\tCREATED\t\tLOCALPORT"
-			print "----------------------------------------------------------------------"
+			print "IP\t\t\tPORT\tPROTO\tHELPER\t\tCREATED"
+			print "----------------------------------------------------------------------------------------------"
 			for connector in self.ENGINE.CONNECTORS:
 				data = connector.split("|")
-				print data[0] + "\t\t" + str(data[1]) + "\t\t" + str(data[2])
+				print data[0] + "\t\t" + str(data[1]) + "\t" + str(data[2]) + "\t" + data[3] + "\t\t"  + data[4]
 		else:
-			print "Invalid list item specified, allowed values are: victims, services,connectors"
+			print "Invalid list item specified, allowed values are: clients, services,connectors"
 	def getUserInput(self):
 		prompt = "np> "
 		user_input = raw_input(prompt).strip()
@@ -138,7 +144,7 @@ class Shell():
 #end class
 
 class Engine():
-	VERBOSITY = 2
+	VERBOSITY = 1
 	LOGTYPE = "screen"
 	SERVERS = []
 	SERVICE_THREAD = None
@@ -155,14 +161,14 @@ class Engine():
 			print value
 		#end if
 	#end def
-	def callback(self, host, port, proto):
+	def callback(self, host, port, transport, proto):
 		if ip.isPrivateAddress(host)==True:
 			print "NATPIN FAILED : received private IP " + host
 		else:
-			print "NATPIN SUCCES : victim exposed port " + str(port) + " on IP " + host
-			self.addConnector(host,str(port))
+			print "NATPIN SUCCES : client exposed " + transport + " port " + str(port) + " on IP " + host
+			self.addConnector(host,str(port),transport,proto)
 	#end def
-	def addConnector(self,ip,port):
+	def addConnector(self,ip,port, transport, proto):
 		global CONNECTORS
 		exists = False
 		for connector in self.CONNECTORS:
@@ -170,7 +176,7 @@ class Engine():
 			if data[0] == ip and str(data[1])==str(port):
 				exists = True
 		if exists == False:
-			self.CONNECTORS.append(ip + "|" + str(port) + "|" + str(datetime.now().time()))
+			self.CONNECTORS.append(ip + "|" + str(port) + "|" + transport + "|" + proto + "|" + str(datetime.now().time()))
 	#end def
 	def delConnectors(self):
 		#removes all created iptables rules
@@ -188,7 +194,7 @@ class Engine():
 			self.SERVERS.append(sip.Server(serverPort=5060,caller=self))
 		try:
 			self.log("Services running, press CTRL-C to exit.",0)
-			self.SERVICE_THREAD = thread.start_new_thread(asyncore.loop,()) #XXX TODO BLOCKING
+			self.SERVICE_THREAD = thread.start_new_thread(asyncore.loop,())
 		except KeyboardInterrupt:
 			self.shutdown()
 	#end def
