@@ -75,9 +75,9 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 
 class Server(Base):
 	def __init__(self,serverPort=60006,proto="TCP", caller=None):
-		self.TYPE = "COMMAND Server"
+		self.TYPE = "Command Server"
 		Base.__init__(self,"TCP",serverPort,caller)
-		self.CALLER.log("Started",0)
+		self.log("Started",0)
 	#end def
 	def protocolhandler(self,conn, addr):
 		global HANDLER

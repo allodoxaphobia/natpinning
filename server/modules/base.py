@@ -10,7 +10,7 @@ import contextlib
 import exceptions
 import subprocess
 import asyncore
-
+import sys
 
 class Base(asyncore.dispatcher):
 	VICTIMID = ""
@@ -35,8 +35,18 @@ class Base(asyncore.dispatcher):
 		except socket.error:
 			# socket.error catches OS with IPv6 disabled
 			self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.bind(('', self.sPort))
-		self.listen(5)
+		try:		
+			self.bind(('', self.sPort))
+			self.listen(5)
+		except socket.error, e:
+			if e.errno == 98:#address alrady in use
+				print self.TYPE + " couldn't start, is something else using port " + str(serverPort) + "?"
+				sys.exit(-1)
+			elif e.errno == 13:#not sufficient permissions
+				print "You don't have sufficient permissons to start a service on port " + str(serverPort) +", are you root?"
+				sys.exit(-1)
+			else:
+				raise e
 	#end def
 	
 	def handle_accept(self):
