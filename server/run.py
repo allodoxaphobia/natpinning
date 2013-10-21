@@ -54,11 +54,11 @@ class Shell():
 		if len(parts)==1:
 			print "Available Commands:"
 			print "   help\t\tPrints this message"
-			print "   list\t\tlist items, expects list to display; clientss, services, Connectors"
+			print "   list\t\tlist items, expects list to display; clients, services, Connectors"
 			print "   \t\tType help list for more information."
 			print "   test\t\tTest natpinning. Command format: test id PROTO IP PORT"
 			print "   \t\tType help test for more information."
-			print "   !\t\tDrop to shell, usefull to quickly run any command on newly exposed ports (like netcat)"
+			print "   !\t\tDrop to shell, usefull to quickly run any command on newly exposed ports (like netcat, telnet, ssh, wget...)"
 			print "   \t\tThis is the fun stuff, type 'help exploit' for more information."
 			print "   clear\t\t Clears the screen."
 			print "   exit\t\tQuits the application."
