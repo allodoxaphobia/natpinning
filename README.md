@@ -4,7 +4,8 @@ This tool is based of the original NAT pinning proof-of-concept by Samy Kamkar: 
 Samy's original proof-of-concept was javascript based, which brought with it several shortcommings:
 	- client-response sequences might be broken due to additional HTTP headers
 	- opening some ports might be blocked by browsers (e.g.: 6667 for irc)
-To overcome these issues we used flash for our lcient side code. We also attempted to extend this proof-of-concept to a more mature state by creating a server side tool which supports several protocols and gives some level of controle over the client behavior.
+To overcome these issues we used flash for our client side component. 
+We also attempted to extend this proof-of-concept to a more mature state by creating a server side tool which supports several protocols and gives some level of controle over the client behavior.
 
 
 
