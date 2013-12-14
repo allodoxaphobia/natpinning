@@ -58,6 +58,7 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 			if len(parts)==2:
 				for vic in self.VICTIMS:
 					if vic.VIC_ID == parts[1]:
+						if test <> "NONE": self.server.log(vic.VIC_ID + " : send " + test,0)
 						vic.LAST_SEEN = datetime.now()
 						break
 		else:
@@ -76,11 +77,11 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 					else:
 						test = vic.TESTS[0]
 						vic.TESTS = vic.TESTS[1:]
-						test = "TEST " + test
+						if test<> "RELOAD":
+							test = "TEST " + test
 					break
 		return test
-	#end def
-			
+	#end def		
 #end class
 
 

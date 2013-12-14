@@ -148,6 +148,9 @@ class Shell():
 				if parts[1].upper() == "VIC":
 					self.CURR_VICTIM = int(parts[2])
 					print "Current victim set to " +  self.getVictimById(self.CURR_VICTIM).VIC_ID
+		elif parts[0].upper()=="RELOAD":
+			if len(parts)==2:
+				self.getVictimById(int(parts[1])).TESTS.append("RELOAD")
 		elif parts[0].upper()=="TEST":
 			self.handleCmd_test(parts)
 		elif parts[0].upper()=="HELP" or parts[0]=="?":
@@ -237,6 +240,4 @@ def main():
 #end def
 if __name__ == '__main__':
     main()
-
-
 
