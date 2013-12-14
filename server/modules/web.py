@@ -45,7 +45,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		if page != "":
 			if page=="exploit.html":
 				agent = self.get_header(data,"USER-AGENT",":")
-				self.server.log("---" + agent,2)
+				self.server.log("---" + agent,0)
 				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: 62.213.198.42\r\nContent-Length: $len$\r\n\r\n"""
 				f = open("exploit/exploit.html","r")
 				body = f.read()
