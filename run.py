@@ -18,7 +18,7 @@ from subprocess import call
 class Shell():
 	ENGINE = None
 	CURR_VICTIM = None
-	COMMANDS = "HELP", "LIST", "SET", "TEST", "EXPLOIT", "QUIT", "EXIT"
+	COMMANDS = "HELP", "LIST", "SET", "TEST", "EXPLOIT", "QUIT", "EXIT", "CLEAR" , "RELOAD"
 	def __init__(self, engine):
 		global ENGINE
 		self.ENGINE = engine
@@ -59,8 +59,8 @@ class Shell():
 			print "   test\t\tTest natpinning. Command format: test id PROTO IP PORT"
 			print "   \t\tType help test for more information."
 			print "   !\t\tDrop to shell, usefull to quickly run any command on newly exposed ports (like netcat, telnet, ssh, wget...)"
-			print "   \t\tThis is the fun stuff, type 'help exploit' for more information."
 			print "   clear\t\t Clears the screen."
+			print "   reload client_id\t\t Relaods the clients browser."
 			print "   exit\t\tQuits the application."
 			print "   quit\t\tQuits the application."
 		elif len(parts)==2:
@@ -91,7 +91,17 @@ class Shell():
 			vic_id = int(args[1])
 			proto = args[2].upper()
 			ip = args[3]
+			if len(ip.split("."))!=4:
+				print("Only IPv4 IP addresses allowed at the moment")
+				return
 			port = args[4]
+			if port.isdigit()==False:
+				print("Invalid port specified.")
+				return
+			else:
+				if int(port)<0 or int(port)>65535:
+					print ("Invalid port specified.")
+					return
 			victim = self.getVictimById(vic_id)
 			if victim == None: 
 				print "You provided an invalid client id, type 'list clients' for a list of available clients."

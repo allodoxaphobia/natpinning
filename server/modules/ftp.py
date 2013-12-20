@@ -41,8 +41,11 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 			self.send("221 byebye\n")
 			self.close()
 		elif len(request)<4:
+			self.send("500 did not understand that.\n")
+			self.server.log("Invalid FTP command:" + request,0)
 			pass
 		else:
+			self.server.log("Invalid FTP command:" + request,0)
 			self.send("500 did not understand that.\n")
 	#end def
 	def ftpCalcAddr(self,lsPortCommand):
@@ -59,6 +62,8 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 			ls = ls.replace("PORT","")
 			ls = ls.strip()
 			parts = ls.split(",")
+			x = int(parts[4])
+			y = int(parts[5])
 			return int(parts[4])*256 + int(parts[5])
 		except:
 			return 0

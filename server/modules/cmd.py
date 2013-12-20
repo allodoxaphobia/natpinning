@@ -61,6 +61,8 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 						if test <> "NONE": self.server.log(vic.VIC_ID + " : send " + test,0)
 						vic.LAST_SEEN = datetime.now()
 						break
+		elif parts[0]=="ERROR":
+			self.server.log("Flash client generated an error" + request)
 		else:
 			self.server.log("Invallid command.",0)
 	def getVicTest(self,cmd):
