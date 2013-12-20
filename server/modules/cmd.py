@@ -17,7 +17,8 @@ class Victim():
 		global VIC_ID, PUBLIC_IP, PRIVATE_IP, TESTS,LAST_SEEN
 		self.PUBLIC_IP = pub_ip.strip()
 		self.PRIVATE_IP= priv_ip.strip()
-		self.VIC_ID = self.PUBLIC_IP.replace(".","").replace(":","") + self.PRIVATE_IP.replace(".","").replace(":","")
+		#self.VIC_ID = self.PUBLIC_IP.replace(".","").replace(":","") + self.PRIVATE_IP.replace(".","").replace(":","")
+		self.VIC_ID = self.PUBLIC_IP + "-" + self.PRIVATE_IP
 		self.LAST_SEEN = datetime.now()	
 		if tests != None: 
 			self.TESTS=tests
