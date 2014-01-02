@@ -111,6 +111,7 @@ class Base(asyncore.dispatcher):
 			if ip.isPrivateAddress(host)==True:
 				test.RESULT=False
 				test.PUBLIC_PORT= "0"
+				test.TRANSPORT= transport
 				print "Test " + test.TEST_ID + " FAILED"
 			else:
 				test.RESULT=True
