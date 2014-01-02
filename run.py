@@ -146,10 +146,13 @@ class Shell():
 			if victims != None:
 				for victim in victims:
 					for test in victim.TESTS:
+						print test.PUBLIC_IP
+						print  test.PRIVATE_IP
+						print test.PRIVATE_PORT
 						if test.PUBLIC_PORT=="0":
-							print test.STATUS + "\t\t" + test.PUBLIC_IP + "\tFAILED\t\t"+ + test.PRIVATE_IP + ":" + test.PRIVATE_PORT
+							print test.STATUS + "\t\t" + test.PUBLIC_IP + "\tFAILED\t\t"+ test.PRIVATE_IP + ":" + test.PRIVATE_PORT
 						else:
-							print test.STATUS + "\t\t" + test.PUBLIC_IP + "\t" + test.PUBLIC_PORT+"/"+test.TRANSPORT + "\t\t" + test.PRIVATE_IP + ":" + test.PRIVATE_PORT
+							print test.STATUS + "\t\t" + test.PUBLIC_IP + "\t" + test.PUBLIC_PORT+"/" + test.TRANSPORT + "\t\t" + test.PRIVATE_IP + ":" + test.PRIVATE_PORT
 		else:
 			print "Invalid list item specified, allowed values are: clients, services,tests"
 	def getUserInput(self):
