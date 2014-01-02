@@ -39,7 +39,7 @@ class Victim():
 		STATUS="" #NEW, INPROGRESS or DONE
 		TRANSPORT="" #TCP or UDP
 		def __init__(self,test_type, public_ip,private_ip,private_port):
-			global TEST_ID, TEST_TYPE, PUBLIC_IP, PRIVATE_IP, PRIVATE_PORT, PUBLIC_PORT, TEST_TYPE, RESULT, STATUS
+			global TEST_ID, TEST_TYPE, PUBLIC_IP, PRIVATE_IP, PRIVATE_PORT, PUBLIC_PORT, TEST_TYPE, RESULT, STATUS,TRANSPORT
 			self.TEST_TYPE=test_type			
 			self.PUBLIC_IP=public_ip
 			self.PRIVATE_IP=private_ip
