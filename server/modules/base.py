@@ -100,7 +100,7 @@ class Base(asyncore.dispatcher):
 					if test.TEST_ID==testid:
 						return victim
 	def callback(self, host, port, transport, proto, testid=None):
-		print "XXXXX " + str(port)
+		print "XXXXX " + str(port) + "/" + transport
 		#XXX TODO: remove isprivateip, much simpler check is to verify wether ip = public ip of victim, if yes: success, if no: FAIL
 		#XXX TODO: replace pront with server.log()
 		if testid != None:
@@ -111,7 +111,7 @@ class Base(asyncore.dispatcher):
 			if ip.isPrivateAddress(host)==True:
 				test.RESULT=False
 				test.PUBLIC_PORT= "0"
-				test.TRANSPORT= transport
+				test.TRANSPORT = transport
 				print "Test " + test.TEST_ID + " FAILED"
 			else:
 				test.RESULT=True
