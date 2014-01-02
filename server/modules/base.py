@@ -114,7 +114,7 @@ class Base(asyncore.dispatcher):
 				print "Test " + test.TEST_ID + " FAILED"
 			else:
 				test.RESULT=True
-				test.PUBLIC_PORT= port
+				test.PUBLIC_PORT= str(port)
 				print "Test " + test.TEST_ID + " SUCCESS"
 	#end def
 	############################################################################
