@@ -27,14 +27,14 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 			self.send("200 Let's do this\n")
 		elif (request[:4].upper() == "USER"):
 			parts = request.split(" ")
-			self.server.VICTIMID = parts[1]
+			self.server.TESTID = parts[1]
 			self.send("331 user ok, need pass\n")
 		elif (request[:4].upper() == "PASS"):
 			self.send("230 is good\n")
 		elif (request[:4].upper() == "LIST"):
 			self.send("150 opening data connection\n")
 			self.server.log("FTP Received PORT + LIST callback request for " + self.cbaddr + " on port " + str(self.cbport),2)
-			self.server.CALLER.callback(self.cbaddr,int(self.cbport),"TCP","FTP PORT")		
+			self.server.callback(self.cbaddr,int(self.cbport),"TCP","FTP PORT", self.server.TESTID)		
 		elif (request[:4].upper()=="PASV"):
 			pass #TODO			
 		elif (request[:4].upper()=="QUIT"):

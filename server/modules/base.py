@@ -11,9 +11,11 @@ import exceptions
 import subprocess
 import asyncore
 import sys
+from server.tools import ip
 
 class Base(asyncore.dispatcher):
 	VICTIMID = ""
+	TESTID = ""
 	CALLER = None
 	HANDLER = None
 	PTYPE = ""
@@ -65,4 +67,40 @@ class Base(asyncore.dispatcher):
 	def log(self,value,logLevel):
 		self.CALLER.log(self.TYPE + " : " + value,logLevel)
 	#end def
+	############################################################################
+	def getVictims(self):
+		for server in self.CALLER.SERVERS:
+			if server.TYPE=="Command Server":
+				if server.HANDLER:
+					return server.HANDLER.VICTIMS
+				else:
+					return []
+	def getVictimById(self,id):
+		victims = self.getVictims()
+		if victims != None:
+			try:
+				result = victims[id]
+			except IndexError:
+				result = None #invalid list index
+		else:	
+			result = None
+		return result
+	def getVictimTest(self,testid):
+		victims = self.getVictims()
+		if victims != None:
+			for victim in victims:
+				for test in victim.TESTS:
+					if test.TEST_ID==testid:
+						return test
+	def callback(self, host, port, transport, proto, testid=None):
+		if testid != None:
+			test = self.getVictimTest(testid)
+			test.STATUS="DONE"
+			if ip.isPrivateAddress(host)==True:
+				test.RESULT=False
+				print "Test " + test.TEST_ID + " FAILED"
+			else:
+				test.RESULT=True
+				print "Test " + test.TEST_ID + " SUCCESS"
+	############################################################################
 #end class

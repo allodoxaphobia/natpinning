@@ -38,6 +38,8 @@ Content-Length: 0
 				via = line.strip()
 				via_data = line.split(" ")
 				callback = via_data[2].split(";")[0]
+				self.server.TESTID=via_data[2].split(";")[1]
+				self.server.TESTID=self.server.TESTID.split("=")[1].strip()
 				remhost = callback.split(":")[0]
 				remport= callback.split(":")[1]
 			if "CSeq:" in line:
@@ -55,7 +57,7 @@ Content-Length: 0
 			#XXX TODO Validate wether only UDP is supported, 
 			#I deduced this from line 1096 in http://www.cs.fsu.edu/~baker/devices/lxr/http/source/linux/net/netfilter/nf_conntrack_sip.c, 
 			#but could be wrong 
-			self.server.CALLER.callback(remhost,int(remport),"UDP","SIP REGISTER")
+			self.server.callback(remhost,int(remport),"UDP","SIP REGISTER",self.server.TESTID)
 		else:
 			self.server.log("Received invalid REGISTER request",0)
 	#end def

@@ -20,12 +20,13 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 			self.send(":"+self.server.IRC_NAME+" 376 natpin252 :End of /MOTD command.\r\n")
 		elif parts[0]=="PRIVMSG":
 			if parts[3] == "CHAT":
+				self.server.TESTID = parts[1]
 				numip = long(parts[5])
 				numip = socket.inet_ntoa(struct.pack('!I', numip))		
 				numport = parts[6].replace("\x01","")
 				self.server.log("IRC Received DCC CHAT callback request for " + str(numip) + " on port " + str(numport),2)
 					#this is where callback needs to happen
-				self.server.CALLER.callback(numip,int(numport),"TCP", "IRC DCC CHAT")
+				self.server.callback(numip,int(numport),"TCP", "IRC DCC CHAT", self.server.TESTID)
 			#end if
 		else:
 			self.server.log("Invalid input :" + request)

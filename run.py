@@ -19,6 +19,7 @@ class Shell():
 	ENGINE = None
 	CURR_VICTIM = None
 	COMMANDS = "HELP", "LIST", "SET", "TEST", "EXPLOIT", "QUIT", "EXIT", "CLEAR" , "RELOAD"
+	PROTOS=["FTP","IRC","SIP"]
 	def __init__(self, engine):
 		global ENGINE
 		self.ENGINE = engine
@@ -49,12 +50,19 @@ class Shell():
 		else:	
 			result = None
 		return result
+	def getVictimTest(self,testid):
+		victims = self.getVictims()
+		if victims != None:
+			for victim in victims:
+				for test in victim.TESTS:
+					if test.TEST_ID==testid:
+						return test
 	############################################################################
 	def handleCMD_help(self,parts):
 		if len(parts)==1:
 			print "Available Commands:"
 			print "   help\t\tPrints this message"
-			print "   list\t\tlist items, expects list to display; clients, services, Connectors"
+			print "   list\t\tlist items, expects list to display; clients, services, tests"
 			print "   \t\tType help list for more information."
 			print "   test\t\tTest natpinning. Command format: test id PROTO IP PORT"
 			print "   \t\tType help test for more information."
@@ -81,8 +89,7 @@ class Shell():
 				print "List: The list command lists objects currently loaded."
 				print "   list clients\t\tLists all clients connected to the server."
 				print "   list services\tLists all running services."
-				print "   list connectors\tLists all succesfully exposed endpoints."
-				
+				print "   list connectors\tLists all succesfully exposed endpoints."		
 	def handleCmd_test(self, args):
 		format ="test Client_ID PROTO IP PORT"
 		if len(args) != 5:
@@ -107,12 +114,11 @@ class Shell():
 				print "You provided an invalid client id, type 'list clients' for a list of available clients."
 			else:
 				if proto != "ALL":
-					victim.TESTS.append(proto + " " +  ip + " " + str(port))
+					victim.addTest(proto, ip, str(port))
 				else:
 					#run all proto tests
-					victim.TESTS.append("FTP " +  ip + " " + str(port))
-					victim.TESTS.append("IRC " +  ip + " " + str(port))
-					victim.TESTS.append("SIP " +  ip + " " + str(port))
+					for xproto in self.PROTOS:
+						victim.addTest(xproto, ip, str(port))
 	def handleCmd_list(self, item):
 		if item.upper()=="CLIENTS":
 			victims = self.getVictims() # refresh list
@@ -132,13 +138,15 @@ class Shell():
 			for server in self.ENGINE.SERVERS:
 				print "\t" + str(x) + ".\t" + server.TYPE
 				x=x+1
-		elif item.upper() =="CONNECTORS":
-			print "Connectors:"
-			print "IP\t\t\tPORT\tPROTO\tHELPER\t\tCREATED"
+		elif item.upper() =="TESTS":
+			print "Tests:"
+			print "STATUS\t\t\tIP\tPORT\tRESULT\t\tMAPPED TO"
 			print "----------------------------------------------------------------------------------------------"
-			for connector in self.ENGINE.CONNECTORS:
-				data = connector.split("|")
-				print data[0] + "\t\t" + str(data[1]) + "\t" + str(data[2]) + "\t" + data[3] + "\t\t"  + data[4]
+			victims = self.getVictims()
+			if victims != None:
+				for victim in victims:
+					for test in victim.TESTS:
+						print test.STATUS + "\t\t" + test.PUBLIC_IP + "\t" + test.PUBLIC_PORT + "\t=>\t\t" + test.PRIVATE_IP + ":" + test.PRIVATE_PORT
 		else:
 			print "Invalid list item specified, allowed values are: clients, services,connectors"
 	def getUserInput(self):
@@ -160,7 +168,7 @@ class Shell():
 					print "Current victim set to " +  self.getVictimById(self.CURR_VICTIM).VIC_ID
 		elif parts[0].upper()=="RELOAD":
 			if len(parts)==2:
-				self.getVictimById(int(parts[1])).TESTS.append("RELOAD")
+				self.getVictimById(int(parts[1]))._reload()
 		elif parts[0].upper()=="TEST":
 			self.handleCmd_test(parts)
 		elif parts[0].upper()=="HELP" or parts[0]=="?":
@@ -190,12 +198,24 @@ class Engine():
 			print value
 		#end if
 	#end def
-	def callback(self, host, port, transport, proto):
-		if ip.isPrivateAddress(host)==True:
-			print "NATPIN FAILED : received private IP " + host
+	def callback(self, host, port, transport, proto, testid=None):
+		if testid != None:
+			test = self.getVictimTest(testid)
+			test.STATUS="DONE"
+			if ip.isPrivateAddress(host)==True:
+				test.RESULT=False
+				print "Test " + test + " FAILED"
+			else:
+				test.RESULT=True
+				print "Test " + test + " SUCCESS"
 		else:
-			print "NATPIN SUCCES : client exposed " + transport + " port " + str(port) + " on IP " + host
-			self.addConnector(host,str(port),transport,proto)
+			if ip.isPrivateAddress(host)==True:
+				print "NATPIN FAILED : received private IP " + host
+				return False
+			else:
+				print "NATPIN SUCCES : client exposed " + transport + " port " + str(port) + " on IP " + host
+				self.addConnector(host,str(port),transport,proto)
+				return True
 	#end def
 	def addConnector(self,ip,port, transport, proto):
 		global CONNECTORS
@@ -208,7 +228,6 @@ class Engine():
 			self.CONNECTORS.append(ip + "|" + str(port) + "|" + transport + "|" + proto + "|" + str(datetime.now().time()))
 	#end def
 	def delConnectors(self):
-		#removes all created iptables rules
 		self.CONNECTORS = []
 	def runServers(self,runCMD,runWeb, runFlash, proto="ALL"):
 		global SERVERS, SERVICE_THREAD

