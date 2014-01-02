@@ -205,6 +205,7 @@ class Engine():
 		#end if
 	#end def
 	def callback(self, host, port, transport, proto, testid=None):
+		print "XXXXX " + port
 		#XXX TODO: remove isprivateip, much simpler check is to verify wether ip = public ip of victim, if yes: success, if no: FAIL
 		#XXX TODO: replace pront with server.log()
 		if testid != None:
