@@ -140,13 +140,16 @@ class Shell():
 				x=x+1
 		elif item.upper() =="TESTS":
 			print "Tests:"
-			print "STATUS\t\t\tIP\tPORT\tRESULT\t\tMAPPED TO"
+			print "STATUS\t\t\tIP\t\tPORT\t\tMAPPED TO"
 			print "----------------------------------------------------------------------------------------------"
 			victims = self.getVictims()
 			if victims != None:
 				for victim in victims:
 					for test in victim.TESTS:
-						print test.STATUS + "\t\t" + test.PUBLIC_IP + "\t" + test.PUBLIC_PORT + "\t=>\t\t" + test.PRIVATE_IP + ":" + test.PRIVATE_PORT
+						if test.PUBLIC_PORT=="0":
+							print test.STATUS + "\t\t" + test.PUBLIC_IP + "\tFAILED\t=>\t\t" + test.PRIVATE_IP + ":" + test.PRIVATE_PORT
+						else:
+							print test.STATUS + "\t\t" + test.PUBLIC_IP + "\t" + test.PUBLIC_PORT + "\t\t" + test.PRIVATE_IP + ":" + test.PRIVATE_PORT
 		else:
 			print "Invalid list item specified, allowed values are: clients, services,tests"
 	def getUserInput(self):
