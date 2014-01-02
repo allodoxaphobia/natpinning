@@ -107,10 +107,10 @@ class Base(asyncore.dispatcher):
 			victim = self.getVictimByTestId(testid)
 			test.STATUS="DONE"
 			test.PUBLIC_IP = victim.PUBLIC_IP
+			test.TRANSPORT = transport
 			if ip.isPrivateAddress(host)==True:
 				test.RESULT=False
 				test.PUBLIC_PORT= "0"
-				test.TRANSPORT = transport
 				print "Test " + test.TEST_ID + " FAILED"
 			else:
 				test.RESULT=True
