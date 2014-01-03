@@ -25,6 +25,13 @@ At this point it is possible to start testing for possible natpinning issues usi
 
 When succesfull nat pinning is detected the user controlling the server can drop to shell and initiate a connection back to the newly exposed port using their favorite tool.
 
+Installation
+==============
+Tested on xubuntu and backtrack, requires python 2.7
+to install:
+git clone https://github.com/allodoxaphobia/natpinning.git
+
+
 Usage
 ==============
 on the server: sudo ./run.py
