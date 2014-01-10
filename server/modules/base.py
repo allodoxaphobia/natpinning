@@ -100,7 +100,7 @@ class Base(asyncore.dispatcher):
 					if test.TEST_ID==testid:
 						return victim
 	def callback(self, host, port, transport, proto, testid=None):
-		#XXX TODO: replace pront with server.log()
+		#XXX TODO: replace print with server.log()
 		if testid != None:
 			test = self.getVictimTest(testid)
 			victim = self.getVictimByTestId(testid)
@@ -109,7 +109,7 @@ class Base(asyncore.dispatcher):
 			test.TRANSPORT = transport
 			if not host in victim.PUBLIC_IP:
 				test.RESULT=False
-				test.PUBLIC_PORT= "0"
+				test.PUBLIC_PORT= "n/a"
 				print "Test " + test.TEST_ID + " FAILED"
 			else:
 				test.RESULT=True
