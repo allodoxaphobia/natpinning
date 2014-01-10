@@ -70,7 +70,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 							for result in client.TESTS:
 								if result.PUBLIC_PORT!="n/a": 
 									rsltstr="Success"
-								body = body + result.TEST_TYPE + "|" + result.STATUS + "|" + result.PRIVATE_IP + "|" + result.PRIVATE_PORT + "|" + rsltstr + "|" + result.PUBLIC_PORT + " (" + test.TRANSPORT + ")\n" 
+								body = body + result.TEST_TYPE + "|" + result.STATUS + "|" + result.PRIVATE_IP + "|" + result.PRIVATE_PORT + "|" + rsltstr + "|" + result.PUBLIC_PORT + " (" + result.TRANSPORT + ")\n" 
 					else:
 						body=""
 				else:
