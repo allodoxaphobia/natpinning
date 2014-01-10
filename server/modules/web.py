@@ -66,9 +66,9 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 					if len(page_parts)==2:
 						client = self.server.CALLER.getVictimById(0);#returns None on error
 						if client !=None:
-							rsltstr ="Failed"
 							for result in client.TESTS:
-								if result.PUBLIC_PORT!="n/a": 
+								rsltstr ="Failed"
+								if result.RESULT==True: 
 									rsltstr="Success"
 								body = body + result.TEST_TYPE + "|" + result.STATUS + "|" + result.PRIVATE_IP + "|" + result.PRIVATE_PORT + "|" + rsltstr + "|" + result.PUBLIC_PORT + " (" + result.TRANSPORT + ")\n" 
 					else:
