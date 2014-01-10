@@ -107,7 +107,7 @@ class Base(asyncore.dispatcher):
 			test.STATUS="DONE"
 			test.PUBLIC_IP = victim.PUBLIC_IP
 			test.TRANSPORT = transport
-			if host in victim.PUBLIC_IP==False:
+			if not host in victim.PUBLIC_IP:
 				test.RESULT=False
 				test.PUBLIC_PORT= "0"
 				print "Test " + test.TEST_ID + " FAILED"
