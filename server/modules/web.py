@@ -68,7 +68,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 						if client !=None:
 							rsltstr ="Failed"
 							for result in client.TESTS:
-								if result.test.PUBLIC_PORT!="n/a": 
+								if result.PUBLIC_PORT!="n/a": 
 									rsltstr="Success"
 								body = body + result.TEST_TYPE + "|" + result.STATUS + "|" + result.PRIVATE_IP + "|" + result.PRIVATE_PORT + "|" + rsltstr + "|" + result.PUBLIC_PORT + " (" + test.TRANSPORT + ")\n" 
 					else:
