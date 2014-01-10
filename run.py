@@ -20,7 +20,6 @@ class Shell():
 	ENGINE = None
 	CURR_VICTIM = None
 	COMMANDS = "HELP", "LIST", "SET", "TEST", "EXPLOIT", "QUIT", "EXIT", "CLEAR" , "RELOAD"
-	PROTOS=["FTP","IRC","SIP","H225"]
 	def __init__(self, engine):
 		global ENGINE
 		self.ENGINE = engine
@@ -71,29 +70,17 @@ class Shell():
 		if len(args) != 5:
 			print "invalid command format, expected : " + format
 		else:
-			vic_id = int(args[1])
+			vic_id = args[1]
 			proto = args[2].upper()
 			ip = args[3]
-			if len(ip.split("."))!=4:
-				print("Only IPv4 IP addresses allowed at the moment")
-				return
 			port = args[4]
-			if port.isdigit()==False:
-				print("Invalid port specified.")
-				return
-			else:
-				if int(port)<0 or int(port)>65535:
-					print ("Invalid port specified.")
-					return
-			victim = self.ENGINE.getVictimById(vic_id)
-			if victim == None: 
-				print "You provided an invalid client id, type 'list clients' for a list of available clients."
-			else:
+			if self.ENGINE.isValidTestCommand(vic_id,proto,ip,port,True):
+				victim = self.ENGINE.getVictimById(int(vic_id))
 				if proto != "ALL":
 					victim.addTest(proto, ip, str(port))
 				else:
 					#run all proto tests
-					for xproto in self.PROTOS:
+					for xproto in self.ENGINE.PROTOS:
 						victim.addTest(xproto, ip, str(port))
 	def handleCmd_list(self, item):
 		if item.upper()=="CLIENTS":
@@ -168,6 +155,7 @@ class Engine():
 	SERVERS = []
 	SERVICE_THREAD = None
 	RULES = []
+	PROTOS=["FTP","IRC","SIP","H225"]
 	def __init__(self, verbosity=0, logType="screen"):
 		global VERBOSITY, LOGTYPE
 		self.VERBOSITY = verbosity
@@ -185,7 +173,7 @@ class Engine():
 		victims = self.getVictims()
 		if victims != None:
 			try:
-				result = victims[id]
+				result = victims[int(id)]
 			except IndexError:
 				result = None #invalid list index
 		else:	
@@ -198,6 +186,29 @@ class Engine():
 				for test in victim.TESTS:
 					if test.TEST_ID==testid:
 						return test
+	def isValidTestCommand(self,clientid,proto,ip,port,printError=False):
+		result = False
+		if not clientid.isdigit():
+			if printError: print "You provided an invalid client id, type 'list clients' for a list of available clients."
+			return False
+		if self.getVictimById(clientid)==None:
+			if printError: print "You provided an invalid client id, type 'list clients' for a list of available clients."
+			return False
+		if not port.isdigit():
+			if printError: print "Invalid port specified. Allowed values: 1-65535"
+			return False
+		else:
+			if int(port)<1 or int(port)>65535:
+				if printError: print "Invalid port specified. Allowed values: 1-65535"
+				return False
+		if len(ip.split("."))!=4:
+			if printError: print("Only IPv4 IP addresses allowed at the moment")
+			return False
+		if not proto.upper() in self.PROTOS and proto.upper()!="ALL":
+			if printError: print("You specified an invalid protocol.")
+			return False		
+		result = True #only gets here if all is well
+		return result
 	############################################################################
 	def log(self, value, logLevel):
 		if logLevel >= self.VERBOSITY:
