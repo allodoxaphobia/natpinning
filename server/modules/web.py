@@ -84,7 +84,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 									client.addTest(params[1].upper(), params[2], params[3])
 								else:
 									#run all proto tests
-									for xproto in self.ENGINE.PROTOS:
+									for xproto in self.server.CALLER.PROTOS:
 										client.addTest(xproto, params[2], params[3])	
 				else:
 					body=""
