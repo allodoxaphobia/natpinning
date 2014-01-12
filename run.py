@@ -109,7 +109,7 @@ class Shell():
 			if victims != None:
 				for victim in victims:
 					for test in victim.TESTS:
-						if test.PUBLIC_PORT=="0":
+						if str(test.PUBLIC_PORT)=="0":
 							print test.STATUS + "\t\t" + test.PUBLIC_IP + "\tFAILED\t\t"+ test.PRIVATE_IP + ":" + test.PRIVATE_PORT
 						else:
 							print test.STATUS + "\t\t" + test.PUBLIC_IP + "\t" + test.PUBLIC_PORT+"/" + test.TRANSPORT + "\t\t" + test.PRIVATE_IP + ":" + test.PRIVATE_PORT
