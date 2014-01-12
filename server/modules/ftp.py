@@ -16,37 +16,44 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 		self.cbport=0
 		self.cbaddr=""
 	def handle_read(self):
-		request = self.recv(1024).strip()
-		if (request[:4].upper() == "PORT"):
-			self.cbport = self.ftpCalcPort(request)
-			self.cbaddr = self.ftpCalcAddr(request)
-			if (self.cbport > 0 ):
-				self.server.log("Callback expected on " + self.cbaddr + ":" + str(self.cbport),1)
+		try:
+			request = self.recv(1024).strip()
+			if (request[:4].upper() == "PORT"):
+				self.cbport = self.ftpCalcPort(request)
+				self.cbaddr = self.ftpCalcAddr(request)
+				if (self.cbport > 0 ):
+					self.server.log("Callback expected on " + self.cbaddr + ":" + str(self.cbport),2)
+				else:
+					self.server.log("Failed to calculate port from: " + line,0)
+				self.send("200 Let's do this\n")
+			elif (request[:4].upper() == "USER"):
+				parts = request.split(" ")
+				self.server.TESTID = parts[1]
+				self.send("331 user ok, need pass\n")
+			elif (request[:4].upper() == "PASS"):
+				self.send("230 is good\n")
+			elif (request[:4].upper() == "LIST"):
+				self.send("150 opening data connection\n")
+				self.server.log("FTP Received PORT + LIST callback request for " + self.cbaddr + " on port " + str(self.cbport),2)
+				self.server.callback(self.cbaddr,int(self.cbport),"TCP","FTP PORT", self.server.TESTID)		
+			elif (request[:4].upper()=="PASV"):
+				pass #TODO			
+			elif (request[:4].upper()=="QUIT"):
+				self.send("221 byebye\n")
+				self.close()
+			elif len(request)<4 and len(request)>0:
+				self.send("500 did not understand that.\n")
+				self.server.log("Invalid FTP command:" + request,0)
+				pass
+			elif len(request)==0:
+				#client closed connection
+				self.server.log("FTP client closed connection.",2)
+				self.close()
 			else:
-				self.server.log("Failed to calculate port from: " + line,0)
-			self.send("200 Let's do this\n")
-		elif (request[:4].upper() == "USER"):
-			parts = request.split(" ")
-			self.server.TESTID = parts[1]
-			self.send("331 user ok, need pass\n")
-		elif (request[:4].upper() == "PASS"):
-			self.send("230 is good\n")
-		elif (request[:4].upper() == "LIST"):
-			self.send("150 opening data connection\n")
-			self.server.log("FTP Received PORT + LIST callback request for " + self.cbaddr + " on port " + str(self.cbport),2)
-			self.server.callback(self.cbaddr,int(self.cbport),"TCP","FTP PORT", self.server.TESTID)		
-		elif (request[:4].upper()=="PASV"):
-			pass #TODO			
-		elif (request[:4].upper()=="QUIT"):
-			self.send("221 byebye\n")
-			self.close()
-		elif len(request)<4:
-			self.send("500 did not understand that.\n")
-			self.server.log("Invalid FTP command:" + request,0)
-			pass
-		else:
-			self.server.log("Invalid FTP command:" + request,0)
-			self.send("500 did not understand that.\n")
+				self.server.log("Invalid FTP command:" + request,0)
+				self.send("500 did not understand that.\n")
+		except Exception,e:
+				self.server.log("Error receiving/sending data." ,1)
 	#end def
 	def ftpCalcAddr(self,lsPortCommand):
 		try:

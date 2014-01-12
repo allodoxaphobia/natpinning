@@ -14,7 +14,9 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 		self.send(self.server.IRC_NAME + " NOTICE AUTH :*** Looking up your hostname...\r\n")
 	def handle_read(self):
 		request = self.recv(1024).strip()
-		if (request == ""): return
+		if len(request)==0:
+			self.server.log("IRC Client disconnected", 2)
+			self.close()
 		parts = request.split(" ")
 		if parts[0]=="NICK":
 			self.send(":"+self.server.IRC_NAME+" 376 natpin252 :End of /MOTD command.\r\n")
@@ -29,7 +31,7 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 				self.server.callback(numip,int(numport),"TCP", "IRC DCC CHAT", self.server.TESTID)
 			#end if
 		else:
-			self.server.log("Invalid input :" + request)
+			self.server.log("Invalid input :" + request, 2)
 #end class
 
 

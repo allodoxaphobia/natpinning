@@ -63,11 +63,13 @@ Content-Length: 0
 	#end def
 	def handle_read(self):
 		data = self.recv(4096)
-		if data !="":
+		if len(data)>0:
 			via = ""
 			lines = data.split("\n")
 			if "REGISTER" in lines[0]: self.handle_REGISTER(lines)
 			elif "INVITE" in lines[0]: self.server.log("RECEIVED INVITE")
+		else:
+			self.server.log("SIP client disconnected",2)
 	#end def
 #end class
 
