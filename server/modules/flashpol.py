@@ -30,7 +30,7 @@ class Server(Base):
 	def __init__(self,serverPort=843,caller=None):
 		self.TYPE = "Flash Policy Server"
 		Base.__init__(self,"TCP",serverPort,caller)
-		self.log("Started",0)
+		self.log("Started",2)
 	#end def
 	def protocolhandler(self,conn, addr):
 		# FLASH POLICY FILE SUPPORT

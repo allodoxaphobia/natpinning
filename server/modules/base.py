@@ -110,11 +110,11 @@ class Base(asyncore.dispatcher):
 			if not host in victim.PUBLIC_IP:
 				test.RESULT=False
 				test.PUBLIC_PORT= "0"
-				print "Test " + test.TEST_ID + " FAILED"
+				self.log("Test " + test.TEST_ID + " FAILED",0)
 			else:
 				test.RESULT=True
 				test.PUBLIC_PORT= str(port)
-				print "Test " + test.TEST_ID + " SUCCESS"
+				self.log("Test " + test.TEST_ID + " SUCCESS",0)
 	#end def
 	############################################################################
 #end class

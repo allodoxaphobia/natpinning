@@ -77,7 +77,7 @@ class Server(Base):
 	def __init__(self,serverPort=5060,caller=None):
 		self.TYPE = "SIP Server"
 		Base.__init__(self,"TCP",serverPort,caller)
-		self.log("Started",0)
+		self.log("Started",2)
 	#end def
 	def protocolhandler(self,conn, addr):
 		self.HANDLER = SIPProtoHandler(conn,addr,self)

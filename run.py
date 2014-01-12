@@ -23,7 +23,7 @@ class Shell():
 	def __init__(self, engine):
 		global ENGINE
 		self.ENGINE = engine
-		print "One shell to rule them all"
+		print "Natpinning test tool - http://github.com/allodoxaphobia/natpinning/"
 		val = ""
 		#readline.parse_and_bind()
 		while val.upper() != "QUIT" and val.upper() != "EXIT":
@@ -208,7 +208,7 @@ class Engine():
 		return result
 	############################################################################
 	def log(self, value, logLevel):
-		if logLevel >= self.VERBOSITY:
+		if logLevel <= self.VERBOSITY:
 			print value
 		#end if
 	#end def
@@ -226,7 +226,7 @@ class Engine():
 		if proto ==  "H225" or proto==  "ALL":
 			self.SERVERS.append(h225.Server(serverPort=1720,caller=self))
 		try:
-			self.log("Services running, press CTRL-C to exit.",0)
+			self.log("Services running, type exit/quit to exit.",0)
 			self.SERVICE_THREAD = thread.start_new_thread(asyncore.loop,())
 		except KeyboardInterrupt:
 			self.shutdown()
@@ -240,10 +240,14 @@ class Engine():
 #end class
 
 def main():
-	parser = OptionParser(usage = '%prog --proto=PROTOCOL --type=CALLBACK_TYPE')
+	usg_msg="""
+	sudo ./run.py
+	Please see the wiki for more information: 
+	http://github.com/allodoxaphobia/natpinning/wiki"""
+	parser = OptionParser(usage = usg_msg)
 	parser.add_option('--no-web', action="store_false", dest='runweb', default=True, help='Do not run the internal web service (port 80).')
 	parser.add_option('--no-flash', action="store_false", dest='runflash', default=True, help='Do not run the internal flash policy service (port 843).')
-	parser.add_option('-v', dest='verbose', default=2, help='Verbosity level, default is 2, set to 0 if you like a lot of output.')
+	parser.add_option('-v', dest='verbose', default=0, help='Verbosity level, default is 0, set to 5 if you like a lot of output.')
 	opts, args = parser.parse_args()
 	
 	

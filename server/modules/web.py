@@ -20,7 +20,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		REQHEADER = ""
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
-		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort),1)
+		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort),3)
 	def get_header(self,req,header_name,splitter=":"):
 		headers=req.split("\n")
 		result = ""
@@ -40,7 +40,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 			if headerparts[0]=="GET":
 				_page = headerparts[1].replace("/","")
 				if _page =="": _page = "exploit.html"
-				self.server.log("Victim requested page: " + _page,0)
+				self.server.log("Victim requested page: " + _page,3)
 		_page=_page.lower()
 		page = _page.split("?")[0];
 		if page != "":
@@ -48,7 +48,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 			arrCommands = ["xclients","xresults","xtest"]
 			if page in arrPages:
 				agent = self.get_header(data,"USER-AGENT",":")
-				self.server.log("---" + agent,0)
+				self.server.log("---" + agent,4)
 				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
 				f = open("exploit/"+page,"r")
 				body = f.read()
@@ -100,7 +100,7 @@ class Server(Base):
 	def __init__(self,serverPort=843, caller=None):
 		self.TYPE = "Web Server"
 		Base.__init__(self,"TCP",serverPort,caller)
-		self.log("Started",0)
+		self.log("Started",2)
 	#end def
 	def protocolhandler(self,conn, addr):
 		# FLASH POLICY FILE SUPPORT

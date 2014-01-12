@@ -10,12 +10,12 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 	def __init__(self,conn_sock, client_address, server):
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
-		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort),0)
+		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort),1)
 		self.send(self.server.IRC_NAME + " NOTICE AUTH :*** Looking up your hostname...\r\n")
 	def handle_read(self):
 		request = self.recv(1024).strip()
 		if len(request)==0:
-			self.server.log("IRC Client disconnected", 2)
+			self.server.log("IRC Client disconnected", 1)
 			self.close()
 		parts = request.split(" ")
 		if parts[0]=="NICK":
@@ -31,7 +31,7 @@ class IRCProtoHandler(asyncore.dispatcher_with_send):
 				self.server.callback(numip,int(numport),"TCP", "IRC DCC CHAT", self.server.TESTID)
 			#end if
 		else:
-			self.server.log("Invalid input :" + request, 2)
+			self.server.log("Invalid input :" + request, 1)
 #end class
 
 
@@ -41,7 +41,7 @@ class Server(Base):
 		self.IRC_NAME="natpin.xploit.net"
 		self.TYPE = "IRC Server"
 		Base.__init__(self,"TCP",serverPort,caller)
-		self.log("Started",0)
+		self.log("Started",2)
 	#end def
 	def protocolhandler(self,conn, addr):
 		self.HANDLER = IRCProtoHandler(conn,addr,self)

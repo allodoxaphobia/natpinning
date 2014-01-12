@@ -24,7 +24,7 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 				if (self.cbport > 0 ):
 					self.server.log("Callback expected on " + self.cbaddr + ":" + str(self.cbport),2)
 				else:
-					self.server.log("Failed to calculate port from: " + line,0)
+					self.server.log("Failed to calculate port from: " + line,1)
 				self.send("200 Let's do this\n")
 			elif (request[:4].upper() == "USER"):
 				parts = request.split(" ")
@@ -43,14 +43,14 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 				self.close()
 			elif len(request)<4 and len(request)>0:
 				self.send("500 did not understand that.\n")
-				self.server.log("Invalid FTP command:" + request,0)
+				self.server.log("Invalid FTP command:" + request,1)
 				pass
 			elif len(request)==0:
 				#client closed connection
-				self.server.log("FTP client closed connection.",2)
+				self.server.log("FTP client closed connection.",1)
 				self.close()
 			else:
-				self.server.log("Invalid FTP command:" + request,0)
+				self.server.log("Invalid FTP command:" + request,1)
 				self.send("500 did not understand that.\n")
 		except Exception,e:
 				self.server.log("Error receiving/sending data." ,1)
@@ -82,7 +82,7 @@ class Server(Base):
 	def __init__(self,serverPort=21,caller=None):
 		self.TYPE = "FTP Server"
 		Base.__init__(self,"TCP",serverPort,caller)
-		self.log("Started",0)
+		self.log("Started",2)
 	#end def
 	def protocolhandler(self,conn, addr):
 		self.HANDLER = FTPProtoHandler(conn,addr,self)
