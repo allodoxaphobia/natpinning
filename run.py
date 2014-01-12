@@ -86,7 +86,7 @@ class Shell():
 		if item.upper()=="CLIENTS":
 			victims = self.ENGINE.getVictims() # refresh list
 			x = 0
-			print "   ID\tClient ID\t\t\tAddress"
+			print "   ID\tClient ID\t\t\tAddress\t\t\tLast Seen"
 			print "--------------------------------------------------------------------------"
 			if victims == None:
 				print "No clients connected yet: point them to http://yourserver/exploit.html?ci=ip-of-client"
@@ -109,9 +109,6 @@ class Shell():
 			if victims != None:
 				for victim in victims:
 					for test in victim.TESTS:
-						print test.PUBLIC_IP
-						print  test.PRIVATE_IP
-						print test.PRIVATE_PORT
 						if test.PUBLIC_PORT=="0":
 							print test.STATUS + "\t\t" + test.PUBLIC_IP + "\tFAILED\t\t"+ test.PRIVATE_IP + ":" + test.PRIVATE_PORT
 						else:
