@@ -96,6 +96,29 @@ Same time on the server side:
  FTP Server : FTP Received PORT + LIST callback request for 192.168.1.44 on port 22
  Test 20140112140348852654 FAILED
 
+Examples (irc/sip/h225):
+========================
+
+np> test 0 irc 192.168.1.4 22
+np> Command Server : ::ffff:85.234.199.198-192.168.1.4 : send 20140112145140604761
+IRC Server : Received connection from ::ffff:85.234.199.198 on port 6667
+IRC Server : IRC Received DCC CHAT callback request for 192.168.1.4 on port 22
+Test 20140112145140604761 FAILED
+
+np> test 0 sip 192.168.1.4 22
+np> Command Server : ::ffff:85.234.199.198-192.168.1.4 : send 20140112145205576743
+SIP Server : Received connection from ::ffff:85.234.199.198 on port 5060
+SIP Server : SIP REGISTER callback (UDP) received for 192.168.1.4 on port 22
+Test 20140112145205576743 FAILED
+
+np> test 0 h225 192.168.1.4 22
+np> Command Server : ::ffff:85.234.199.198-192.168.1.4 : send 20140112145230712736
+H225 Server : Received connection from ::ffff:85.234.199.198 on port 1720
+H225 Server : Q931.Type: 7
+20140112145230712736
+H225 Server : Q931.PDU Length: 76
+Test 20140112145230712736 FAILED
+
 
 License
 ==============
