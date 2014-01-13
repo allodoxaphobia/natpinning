@@ -1,16 +1,8 @@
 #!/usr/bin/env python
-from server.modules import irc
-from server.modules import ftp
-from server.modules import flashpol
-from server.modules import web
-from server.modules import sip
-from server.modules import h225
-from server.modules import cmd
+from server import engine
 from optparse import OptionParser
 from server.tools import ip
 import sys
-import asyncore
-import thread
 import readline
 import socket
 from datetime import datetime
@@ -146,99 +138,6 @@ class Shell():
 	#end def
 #end class
 
-class Engine():
-	VERBOSITY = 0
-	LOGTYPE = "screen"
-	SERVERS = []
-	SERVICE_THREAD = None
-	RULES = []
-	PROTOS=["FTP","IRC","SIP","H225"]
-	def __init__(self, verbosity=0, logType="screen"):
-		global VERBOSITY, LOGTYPE
-		self.VERBOSITY = verbosity
-		LOGTYPE = logType #either "screen" or filename
-	#end def
-	############################################################################
-	def getVictims(self):
-		for server in self.SERVERS:
-			if server.TYPE=="Command Server":
-				if server.HANDLER:
-					return server.HANDLER.VICTIMS
-				else:
-					return []
-	def getVictimById(self,id):
-		victims = self.getVictims()
-		if victims != None:
-			try:
-				result = victims[int(id)]
-			except IndexError:
-				result = None #invalid list index
-		else:	
-			result = None
-		return result
-	def getVictimTest(self,testid):
-		victims = self.getVictims()
-		if victims != None:
-			for victim in victims:
-				for test in victim.TESTS:
-					if test.TEST_ID==testid:
-						return test
-	def isValidTestCommand(self,clientid,proto,ip,port,printError=False):
-		result = False
-		if not clientid.isdigit():
-			if printError: print "You provided an invalid client id, type 'list clients' for a list of available clients."
-			return False
-		if self.getVictimById(clientid)==None:
-			if printError: print "You provided an invalid client id, type 'list clients' for a list of available clients."
-			return False
-		if not port.isdigit():
-			if printError: print "Invalid port specified. Allowed values: 1-65535"
-			return False
-		else:
-			if int(port)<1 or int(port)>65535:
-				if printError: print "Invalid port specified. Allowed values: 1-65535"
-				return False
-		if len(ip.split("."))!=4:
-			if printError: print("Only IPv4 IP addresses allowed at the moment")
-			return False
-		if not proto.upper() in self.PROTOS and proto.upper()!="ALL":
-			if printError: print("You specified an invalid protocol.")
-			return False		
-		result = True #only gets here if all is well
-		return result
-	############################################################################
-	def log(self, value, logLevel):
-		if logLevel <= self.VERBOSITY:
-			print value
-		#end if
-	#end def
-	def runServers(self,runCMD,runWeb, runFlash, proto="ALL"):
-		global SERVERS, SERVICE_THREAD
-		if runCMD == True: self.SERVERS.append(cmd.Server(proto="TCP",serverPort=60003,caller=self))
-		if (runWeb==True): self.SERVERS.append(web.Server(serverPort=80,caller=self))#required: flash policy server
-		if (runFlash==True): self.SERVERS.append(flashpol.Server(serverPort=843,caller=self))
-		if proto== "FTP" or proto== "ALL":
-	        	self.SERVERS.append(ftp.Server(serverPort=21,caller=self))
-		if proto== "IRC" or proto== "ALL":
-			self.SERVERS.append(irc.Server(serverPort=6667,caller=self))
-		if proto ==  "SIP" or proto==  "ALL":
-			self.SERVERS.append(sip.Server(serverPort=5060,caller=self))
-		if proto ==  "H225" or proto==  "ALL":
-			self.SERVERS.append(h225.Server(serverPort=1720,caller=self))
-		try:
-			self.log("Services running, type exit/quit to exit.",0)
-			self.SERVICE_THREAD = thread.start_new_thread(asyncore.loop,())
-		except KeyboardInterrupt:
-			self.shutdown()
-	#end def
-	def shutdown(self):
-		global SERVICE_THREAD
-		for server in self.SERVERS:
-			server.stop()
-		self.SERVICE_THREAD = None
-	#end def
-#end class
-
 def main():
 	usg_msg="""
 	sudo ./run.py
@@ -251,7 +150,7 @@ def main():
 	opts, args = parser.parse_args()
 	
 	
-	x = Engine(int(opts.verbose),"screen")
+	x = engine.Engine(int(opts.verbose),"screen")
 	x.runServers(True,opts.runweb,opts.runflash,"ALL")
 	s = Shell(x)
 #end def

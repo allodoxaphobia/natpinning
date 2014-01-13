@@ -20,9 +20,13 @@ class Base(asyncore.dispatcher):
 	HANDLER = None
 	PTYPE = ""
 	def __init__(self,sType, serverPort,caller):
-		#caller is the calling object, this has to be of a class that supports the following methods
-		#log(string, loglevel)
-		#callback(host,port, proto) whereby proto is TCP or UDP
+		""" Base Class initialization
+		
+		Args:
+			sType (string): either TCP or UDP
+			serverPort (int): defzault port number the service will listen on (1-65535)
+			caller (object): Instance of Engine class.
+		"""
 		global CALLER, PTYPE
 		self.CALLER = caller
 		asyncore.dispatcher.__init__(self)
@@ -52,6 +56,9 @@ class Base(asyncore.dispatcher):
 	#end def
 	
 	def handle_accept(self):
+		"""Event, triggered when the socket receives a new connection.
+		Grabs connection and address information from the socket and sets the protocolhandler.
+		"""
 		pair = self.accept()
 		if pair is not None:
 			conn, addr = pair
@@ -59,51 +66,27 @@ class Base(asyncore.dispatcher):
 			
 	#end def
 	def protocolhandler(self,conn, addr):
+		""" Class object used to handle protcol data. Will be overwritten by inheriting class."""
 		pass
 	#end def
 	def stop(self):
 		self.close()
 	#end def
 	def log(self,value,logLevel):
+		"""Calls Engine.log"""
 		self.CALLER.log(self.TYPE + " : " + value,logLevel)
-	#end def
-	############################################################################
-	def getVictims(self):
-		for server in self.CALLER.SERVERS:
-			if server.TYPE=="Command Server":
-				if server.HANDLER:
-					return server.HANDLER.VICTIMS
-				else:
-					return []
-	def getVictimById(self,id):
-		victims = self.getVictims()
-		if victims != None:
-			try:
-				result = victims[id]
-			except IndexError:
-				result = None #invalid list index
-		else:	
-			result = None
-		return result
-	def getVictimTest(self,testid):
-		victims = self.getVictims()
-		if victims != None:
-			for victim in victims:
-				for test in victim.TESTS:
-					if test.TEST_ID==testid:
-						return test
-	def getVictimByTestId(self,testid):
-		victims = self.getVictims()
-		if victims != None:
-			for victim in victims:
-				for test in victim.TESTS:
-					if test.TEST_ID==testid:
-						return victim
+	#end def	
 	def callback(self, host, port, transport, proto, testid=None):
-		#XXX TODO: replace print with server.log()
+		"""Callback is the function to call from any inheriting class when test are concluded
+		Args:
+			host (string): remote ip as returned by the test packet
+			port (string): remote port as returned by the test packet
+			transport (string):"TCP" or "UDP" 
+			protcol (string): protocol used during testing ,set this to the value of the inheriting's classes TYPE var.
+		"""
 		if testid != None:
-			test = self.getVictimTest(testid)
-			victim = self.getVictimByTestId(testid)
+			test = self.CALLER.getVictimTest(testid)
+			victim = self.CALLER.getVictimByTestId(testid)
 			test.STATUS="DONE"
 			test.PUBLIC_IP = victim.PUBLIC_IP
 			test.TRANSPORT = transport
