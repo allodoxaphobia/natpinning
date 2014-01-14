@@ -272,6 +272,8 @@ class Shell():
 			call(["bash"])
 		elif parts[0].upper()=="CLEAR":
 			call(["clear"])
+		else:
+			print "Invalid command. Type <help> for a list of available commands."
 	#end def
 #end class
 
