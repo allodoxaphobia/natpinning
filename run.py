@@ -154,11 +154,15 @@ class Shell():
 			ips.append(ipparts[0]+"."+ipparts[1]+"."+ipparts[2]+"."+tmpipblock)
 		#add tests to client
 		for ip in ips:
-			for port in ports:
-				if self.ENGINE.isValidTestCommand(vicid,"ALL",ip,str(port),False):
-					#input is validated
-					for xproto in self.ENGINE.PROTOS:
-						victim.addTest(xproto, ip, str(port))
+			if ip==victim.PRIVATE_IP:
+				for port in ports:
+					if self.ENGINE.isValidTestCommand(vicid,"ALL",ip,str(port),False):
+						#input is validated
+						for xproto in self.ENGINE.PROTOS:
+							victim.addTest(xproto, ip, str(port))
+			else:
+				if self.ENGINE.isValidTestCommand(vicid,"ALL",ip,str(65500),False):
+					victim.addTest(xproto, ip, str(65500))
 	def handleCmd_list(self, command):
 		parts = command.split(" ")
 		if len(parts)<2:
