@@ -43,7 +43,7 @@ class Engine():
 	def getExternalIP(self):
 		"""Calls remote page over HTTP to get external IP address, returns string"""
 		try:
-			req = urllib2.urlopen('http://checkip.dyndns.com')
+			req = urllib2.urlopen('http://checkip.dyndns.com',3)
 			data = req.read().split(" ")
 			sip = data[len(data)-1].strip()
 			if sip.index("<")<= 1:
@@ -57,7 +57,7 @@ class Engine():
 		if sip=="":
 			#backup plan 
 			try:
-				req = urllib2.urlopen('https://enabledns.com/ip')
+				req = urllib2.urlopen('https://enabledns.com/ip',3)
 				sip = req.read()
 			except Exception, e:
 				self.log("Failed to retrieve public IP from: https://enabledns.com/ip" + e.message ,1)
