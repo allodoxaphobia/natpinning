@@ -1,3 +1,6 @@
+#online docs
+docs/
+
 *.py[cod]
 *.*~ 
 # C extensions
