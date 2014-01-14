@@ -79,19 +79,20 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 		else:
 			ci = ""
 		if parts[0]=="REG":
-			#new client received, grap local ip and return test id
-			vic = Victim(self.getpeername()[0],ci)
+			#new client received, grap local ip and return client id
+			vic = Victim(self.server.CALLER.getRemotePeer(self),ci)
 			vixexists=False
 			for victim in self.VICTIMS:
 				if victim.VIC_ID == vic.VIC_ID:
 					vixexists=True
 					break
 			if vixexists != True:
-				self.server.log("New client registered as " + vic.VIC_ID, 2)
+				self.server.log("New client registered as " + vic.VIC_ID, 0)
 				self.VICTIMS.append(vic)
 			else:
-				self.server.log("Victim reconnected : " + vic.VIC_ID, 2)
+				self.server.log("Client reconnected : " + vic.VIC_ID, 1)
 			self.send("SET ID " + vic.VIC_ID + "\n")
+			vic.LAST_SEEN = datetime.now()
 		elif parts[0]=="POLL":
 			#self.server.log("POLLING request from " + parts[1], 1)
 			test = self.getVicTest(request)
@@ -100,13 +101,19 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 				test.STATUS="INPROGRESS"
 				for vic in self.VICTIMS:
 					if vic.VIC_ID == parts[1]:
-						self.server.log(vic.VIC_ID + " : send " + test.TEST_ID,0)
+						self.server.log(vic.VIC_ID + " : send " + test.TEST_ID,1)
 						vic.LAST_SEEN = datetime.now()
 						break
+		elif parts[0]=="RESULT":
+			#todo, get test id from request
+			#and validate source ip then call self.getTestResult with these two values
+			pass
 		elif parts[0]=="ERROR":
 			self.server.log("Flash client generated an error" + request)
 		else:
 			self.server.log("Invallid command.",0)
+	def getTestResult(self,testid):
+		pass
 	def getVicTest(self,cmd):
 		global VICTIMS
 		test = None

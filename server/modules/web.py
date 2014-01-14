@@ -34,6 +34,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		global REQPAGE, REQHEADER, REQHEADERDONE
 		data = self.recv(1024)
 		request = self.get_header(data,"GET", " ")
+		cookie = self.get_header(data,"cookie", ":")
 		_page = ""
 		if request <>"":
 			headerparts = request.split(" ")
@@ -44,7 +45,8 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		_page=_page.lower()
 		page = _page.split("?")[0];
 		if page != "":
-			arrPages = ["exploit.html","exploit.swf","admin.html","gremwell_logo.png","admin.js","admin.css"]
+			arrPages = ["exploit.html","exploit.swf","gremwell_logo.png","login.html"]
+			arrAdminPages=["admin.html","admin.js","admin.css"]
 			arrCommands = ["xclients","xresults","xtest"]
 			if page in arrPages:
 				agent = self.get_header(data,"USER-AGENT",":")
@@ -53,6 +55,13 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				f = open("exploit/"+page,"r")
 				body = f.read()
 				f.close()
+			elif page in arrAdminPages:
+				agent = self.get_header(data,"USER-AGENT",":")
+				self.server.log("---" + agent,4)
+				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
+				f = open("exploit/"+page,"r")
+				body = f.read()
+				f.close()			
 			elif page.split("?")[0] in arrCommands:
 				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
 				body=""

@@ -19,6 +19,7 @@ class Base(asyncore.dispatcher):
 	CALLER = None
 	HANDLER = None
 	PTYPE = ""
+	PORT = 0
 	def __init__(self,sType, serverPort,caller):
 		""" Base Class initialization
 		
@@ -27,8 +28,9 @@ class Base(asyncore.dispatcher):
 			serverPort (int): defzault port number the service will listen on (1-65535)
 			caller (object): Instance of Engine class.
 		"""
-		global CALLER, PTYPE
+		global CALLER, PTYPE,PORT
 		self.CALLER = caller
+		self.PORT = serverPort
 		asyncore.dispatcher.__init__(self)
 		self.sPort = int(serverPort)
 		if sType =="TCP" or sType == "UDP": self.PTYPE = sType
@@ -90,14 +92,15 @@ class Base(asyncore.dispatcher):
 			test.STATUS="DONE"
 			test.PUBLIC_IP = victim.PUBLIC_IP
 			test.TRANSPORT = transport
+			msg = test.PRIVATE_IP+":"+test.PRIVATE_PORT
 			if not host in victim.PUBLIC_IP:
 				test.RESULT=False
 				test.PUBLIC_PORT= "0"
-				self.log("Test " + test.TEST_ID + " FAILED",0)
+				self.log("Test " + msg + " FAILED",0)
 			else:
 				test.RESULT=True
 				test.PUBLIC_PORT= str(port)
-				self.log("Test " + test.TEST_ID + " SUCCESS",0)
+				self.log("Test " + msg + " SUCCESS",0)
 	#end def
 	############################################################################
 #end class

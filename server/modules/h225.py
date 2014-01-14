@@ -30,7 +30,6 @@ class H225ProtHandler(asyncore.dispatcher_with_send):
 				infofield1_type = struct.unpack(">B",q931[1:2])[0]
 				infofield1_length = struct.unpack(">B",q931[2:3])[0]
 				infofield1 = q931[3:3+infofield1_length]
-				print str(infofield1)
 				
 				q931 = q931[3+infofield1_length:]#strip of infofield1
 				infofield2_type = struct.unpack(">B",q931[0:1])[0]
