@@ -75,7 +75,7 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 		if (request == ""): return
 		parts = request.split(" ")
 		if len(parts)==2:
-			ci = parts[1] #client identifier
+			ci = parts[1].strip() #client identifier
 		else:
 			ci = ""
 		if parts[0]=="REG":
@@ -96,14 +96,16 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 		elif parts[0]=="POLL":
 			#self.server.log("POLLING request from " + parts[1], 1)
 			test = self.getVicTest(request)
-			if test != None:
+			client = None
+			for item in self.VICTIMS:
+				if item.VIC_ID==ci:
+					client = item
+					client.LAST_SEEN=datetime.now()
+					break
+			if test != None and client != None:
 				self.send(test.getTestString() + "\n")
 				test.STATUS="INPROGRESS"
-				for vic in self.VICTIMS:
-					if vic.VIC_ID == parts[1]:
-						self.server.log(vic.VIC_ID + " : send " + test.TEST_ID,1)
-						vic.LAST_SEEN = datetime.now()
-						break
+				self.server.log(client.VIC_ID + " : send " + test.TEST_ID,1)
 		elif parts[0]=="RESULT":
 			#todo, get test id from request
 			#and validate source ip then call self.getTestResult with these two values

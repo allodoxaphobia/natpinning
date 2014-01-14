@@ -216,7 +216,7 @@ class Shell():
 			print "   public ip: " + victim.PUBLIC_IP
 			print "   last seen: " + victim.LAST_SEEN.strftime("%H:%M:%S")
 			print ""
-			header= "%20s%5s%20s%10s%10s"  % ("From"," ","To","TCP/UDP","Result")
+			header= "%10s%21s%5s%21s%10s%10s"  % ("Protocol","From"," ","To","TCP/UDP","Result")
 			print header
 			print self.setTableLine(len(header))
 			if len(victim.TESTS)==0:
@@ -232,7 +232,7 @@ class Shell():
 								result = "SUCCESS"
 							public_if = test.PUBLIC_IP + ":" + test.PUBLIC_PORT
 							private_if = test.PRIVATE_IP + ":" + test.PRIVATE_PORT
-							print "%20s%5s%20s%10s%10s" % (public_if,"=>",private_if,test.TRANSPORT,result)
+							print "%10s%21s%5s%21s%10s%10s" % (test.TEST_TYPE,public_if,"=>",private_if,test.TRANSPORT,result)
 		else:
 			print "Invalid list item specified, allowed values are: clients, services,tests"
 	def setTableLine(self,length):
@@ -248,30 +248,37 @@ class Shell():
 	def handleCMD(self,val):
 		global CURR_VICTIM
 		parts = val.split(" ")
-		if parts[0].upper()=="LIST":
+		command = parts[0].upper()
+		if command=="LIST":
 			self.handleCmd_list(val)
-		elif parts[0].upper()=="SET":
+		elif command=="SET":
 			if len(parts)==3:
 				if parts[1].upper() == "VIC":
 					self.CURR_VICTIM = int(parts[2])
 					print "Current victim set to " +  self.ENGINE.getVictimById(self.CURR_VICTIM).VIC_ID
-		elif parts[0].upper()=="RELOAD":
+		elif command=="RELOAD":
 			if len(parts)==2:
 				client = self.ENGINE.getVictimById(int(parts[1]))
 				if client != None:
 					client._reload()
 				else:
 					print "Invalid client id. Type <list clients> for available clients."
-		elif parts[0].upper()=="TEST":
+		elif command=="TEST":
 			self.handleCmd_test(parts)
-		elif parts[0].upper()=="AUTOTEST":
+		elif command=="AUTOTEST":
 			self.handleCmd_autotest(parts)
-		elif parts[0].upper()=="HELP" or parts[0]=="?":
+		elif command=="HELP" or parts[0]=="?":
 			self.handleCMD_help(parts)
-		elif parts[0]=="!":
+		elif command=="!":
 			call(["bash"])
-		elif parts[0].upper()=="CLEAR":
+		elif command=="CLEAR":
 			call(["clear"])
+		elif command=="QUIT" or command=="EXIT":
+			#handled in calling routine
+			pass
+		elif command=="":
+			#ignore
+			pass
 		else:
 			print "Invalid command. Type <help> for a list of available commands."
 	#end def
