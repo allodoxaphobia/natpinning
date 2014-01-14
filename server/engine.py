@@ -49,7 +49,7 @@ class Engine():
 			if sip.index("<")<= 1:
 				sip = ""
 			else:
-				sip = sip[:sip.index("<")-1]
+				sip = sip[:sip.index("<")]
 		except Exception,e:
 			print e
 			self.log("Failed to retrieve public IP from: http://checkip.dyndns.com :" + e.message,1)
