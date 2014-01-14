@@ -288,6 +288,7 @@ def main():
 	parser.add_option('-v', dest='verbose', default=0, help='Verbosity level, default is 0, set to 5 if you like a lot of output.')
 	opts, args = parser.parse_args()
 	print ""
+	print "Loading... please wait."
 	x = engine.Engine(int(opts.verbose),"screen")
 	x.runServers(True,opts.runweb,opts.runflash,opts.webport,"ALL")
 	if opts.no_clear:
