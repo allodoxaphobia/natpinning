@@ -74,10 +74,10 @@ class Shell():
 				print "   it instructs a client to perform a natpin test."
 				print ""
 				print "Usage: "
-				print "   test <client_id> <protocol> <ip> <port>"
+				print """   test <client_id> (<protocol>|"ALL") (<ip>|"$") <port>"""
 				print ""
 				print "Notes: "
-				print "   Supported protocols: FTP, IRC, SIP, H.225, ALL"
+				print "   Supported protocols: 'FTP, IRC, SIP, H.225', use ALL to test all protocols"
 				print "   Ip can be replaced by $ to use client's own private ip."
 				print ""
 				print "Examples: "
@@ -92,7 +92,7 @@ class Shell():
 				print "   and this for the client's private IP and another IP."
 				print ""
 				print "Usage: "
-				print "   autotest <client id>"
+				print "   autotest [client-id]"
 				print ""
 				print "Note: "
 				print "   If client id is ommited, will default to 0"
@@ -102,7 +102,7 @@ class Shell():
 				print "List: The list command lists objects currently loaded."
 				print "   list clients: lists all clients that connected since the program started."
 				print "   list services: lists all services started by the program."
-				print "   list tests: lists all tests performed for the given client id"
+				print "   list tests [id]: lists all tests performed for the given client id"
 				print " "
 				print "Usage:"
 				print "   list clients"
@@ -114,7 +114,6 @@ class Shell():
 				print "   list tests: If client id is ommited, will default to 0"
 				print ""
 	def handleCmd_test(self, args):
-		format ="test Client_ID PROTO IP PORT"
 		if len(args) != 5:
 			print "Invalid command format, type <help test> for correct syntax."
 		else:
