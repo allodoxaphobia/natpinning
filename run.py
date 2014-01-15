@@ -9,20 +9,22 @@ from datetime import datetime
 from subprocess import call
 
 class Shell():
+	#Own Vars
 	ENGINE = None
 	CURR_VICTIM = None
 	COMMANDS = "HELP", "LIST", "SET", "TEST", "EXPLOIT", "QUIT", "EXIT", "CLEAR" , "RELOAD"
+	#cmd.Cmd vars
+	intro = ""
+	completekey='tab'
 	def __init__(self, engine):
 		global ENGINE
 		self.ENGINE = engine
 		print "Interactive shell, type <help> if you're not sure on how to proceed."
 		val = ""
-		#readline.parse_and_bind()
 		while val.upper() != "QUIT" and val.upper() != "EXIT":
 			val = self.getUserInput()
 			self.handleCMD(val)
 		self.ENGINE.shutdown()
-		#end while
 	#end def
 
 	def handleCMD_help(self,parts):
@@ -242,7 +244,7 @@ class Shell():
 			x = x+"-"
 		return x
 	def getUserInput(self):
-		prompt = ""
+		prompt = "np> "
 		user_input = raw_input(prompt).strip()
 		return user_input
 	def handleCMD(self,val):
