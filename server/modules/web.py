@@ -71,6 +71,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 						if cmdsrv != None:
 							command= _page.split("?")[1].strip().split("_")
 							if command[0].upper()=="REG":
+								body=""
 								#DISABLED FOR NOW
 								#self.server.log("Web REG request " + cookie, 2)
 								#cmdsrv.createVictim(cookie,self.server.CALLER.getRemotePeer(self),"")
