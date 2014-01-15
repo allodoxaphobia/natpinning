@@ -297,11 +297,15 @@ def main():
 	print "Loading... please wait."
 	x = engine.Engine(int(opts.verbose),"screen")
 	x.runServers(True,opts.runweb,opts.runflash,opts.webport,"ALL")
-	print "Natpinning test tool - http://github.com/allodoxaphobia/natpinning/"
+	
 	if x.PUBLIC_IP=="":
 		x.log("Automatic detecting of external IP failed.",0)
 		x.PUBLIC_IP = "SERVER_PUBLIC_IP"
-		
+	print ""
+	print "Natpinning test tool"
+	print "--------------------"
+	print "Connect clients at http://" +x.PUBLIC_IP + ":" + str(opts.webport) + "/exploit.html?ci=PrivateIpOfClient"
+	print ""
 	s = Shell(x)
 
 #end def
