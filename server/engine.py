@@ -42,6 +42,7 @@ class Engine():
 					return []
 	def getExternalIP(self):
 		"""Calls remote page over HTTP to get external IP address, returns string"""
+		self.log("Calling checkip.dns.com to determine external ip.",0)
 		try:
 			req = urllib2.urlopen('http://checkip.dyndns.com',None, 3)
 			data = req.read().split(" ")
@@ -56,6 +57,7 @@ class Engine():
 		if sip=="":
 			#backup plan 
 			try:
+				self.log("Calling enabledns.com to determine external ip.",0)
 				req = urllib2.urlopen('https://enabledns.com/ip',None,3)
 				sip = req.read()
 			except Exception, e:

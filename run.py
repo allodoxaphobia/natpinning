@@ -29,7 +29,6 @@ class Shell():
 
 	def handleCMD_help(self,parts):
 		if len(parts)==1:
-			call("clear")
 			exploit_page = self.ENGINE.getExploitPage()
 			print "For extended help check out the wiki \n(https://github.com/allodoxaphobia/natpinning/wiki)."
 			print ""
@@ -177,7 +176,6 @@ class Shell():
 				print "No clients connected yet. To make a client connect, let them browse to"
 				print self.ENGINE.getExploitPage()
 			else:
-				call("clear")
 				header= "%5s%15s%15s%15s"  % ("ID","Public IP", "Private IP","Last Seen")
 				print header
 				print self.setTableLine(len(header))				
@@ -213,7 +211,6 @@ class Shell():
 			if victim == None:
 				print "Invalid client id specified. Type <help list> for correct syntax."
 				return 0
-			call("clear")
 			print "Client:"
 			print "   public ip: " + victim.PUBLIC_IP
 			print "   last seen: " + victim.LAST_SEEN.strftime("%H:%M:%S")
@@ -294,15 +291,12 @@ def main():
 	parser.add_option('--no-web', action="store_false", dest='runweb', default=True, help='Do not run the internal web service (port 80).')
 	parser.add_option('--no-flash', action="store_false", dest='runflash', default=True, help='Do not run the internal flash policy service (port 843).')
 	parser.add_option('--web-port', dest='webport', default=80, help='Specify different port for webserver.')
-	parser.add_option('--no-clear', action="store_false", dest='no_clear', default=True, help="Don't clear screen when program starts.")
 	parser.add_option('-v', dest='verbose', default=0, help='Verbosity level, default is 0, set to 5 if you like a lot of output.')
 	opts, args = parser.parse_args()
 	print ""
 	print "Loading... please wait."
 	x = engine.Engine(int(opts.verbose),"screen")
 	x.runServers(True,opts.runweb,opts.runflash,opts.webport,"ALL")
-	if opts.no_clear:
-		call(["clear"])
 	print "Natpinning test tool - http://github.com/allodoxaphobia/natpinning/"
 	if x.PUBLIC_IP=="":
 		x.log("Automatic detecting of external IP failed.",0)
