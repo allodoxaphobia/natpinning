@@ -291,11 +291,12 @@ def main():
 	parser.add_option('--no-web', action="store_false", dest='runweb', default=True, help='Do not run the internal web service (port 80).')
 	parser.add_option('--no-flash', action="store_false", dest='runflash', default=True, help='Do not run the internal flash policy service (port 843).')
 	parser.add_option('--web-port', dest='webport', default=80, help='Specify different port for webserver.')
+	parser.add_option('--no-ip', action="store_false", dest='noip', default=True, help='Don\' call external URLs to determine ip.')
 	parser.add_option('-v', dest='verbose', default=0, help='Verbosity level, default is 0, set to 5 if you like a lot of output.')
 	opts, args = parser.parse_args()
 	print ""
 	print "Loading... please wait."
-	x = engine.Engine(int(opts.verbose),"screen")
+	x = engine.Engine(int(opts.verbose),opts.noip,"screen")
 	x.runServers(True,opts.runweb,opts.runflash,opts.webport,"ALL")
 	
 	if x.PUBLIC_IP=="":
