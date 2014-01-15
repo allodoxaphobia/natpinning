@@ -64,15 +64,11 @@ class Victim():
 #end class
 #end class
 class CMDProtoHandler(asyncore.dispatcher_with_send):
-	VICTIMS = []
 	def __init__(self,conn_sock, client_address, server):
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
 		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort), 1)
-	def handle_read(self):
-		global VICTIMS, LAST_SEEN
-		request = self.recv(1024).strip()
-		if (request == ""): return
+	def handle_data(self,request):
 		parts = request.split(" ")
 		if len(parts)==2:
 			ci = parts[1].strip() #client identifier
@@ -82,13 +78,13 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 			#new client received, grap local ip and return client id
 			vic = Victim(self.server.CALLER.getRemotePeer(self),ci)
 			vixexists=False
-			for victim in self.VICTIMS:
+			for victim in self.server.VICTIMS:
 				if victim.VIC_ID == vic.VIC_ID:
 					vixexists=True
 					break
 			if vixexists != True:
 				self.server.log("New client registered as " + vic.VIC_ID, 0)
-				self.VICTIMS.append(vic)
+				self.server.VICTIMS.append(vic)
 			else:
 				self.server.log("Client reconnected : " + vic.VIC_ID, 1)
 			self.send("SET ID " + vic.VIC_ID + "\n")
@@ -97,7 +93,7 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 			#self.server.log("POLLING request from " + parts[1], 1)
 			test = self.getVicTest(request)
 			client = None
-			for item in self.VICTIMS:
+			for item in self.server.VICTIMS:
 				if item.VIC_ID==ci:
 					client = item
 					client.LAST_SEEN=datetime.now()
@@ -114,16 +110,21 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 			self.server.log("Flash client generated an error" + request)
 		else:
 			self.server.log("Invallid command.",0)
+	def handle_read(self):
+		request = self.recv(1024).strip()
+		if (request == ""): 
+			return
+		else:
+			self.handle_data(request)
 	def getTestResult(self,testid):
 		pass
 	def getVicTest(self,cmd):
-		global VICTIMS
 		test = None
 		pollreq = cmd.split(" ")
 		if len(pollreq) != 2:
 			self.server.log("Invallid POLL request: " + cmd, 0)
 		else:
-			for vic in self.VICTIMS:
+			for vic in self.server.VICTIMS:
 				if vic.VIC_ID == pollreq[1]:
 					for xtest in vic.TESTS:
 						if xtest.STATUS=="NEW":
@@ -135,14 +136,28 @@ class CMDProtoHandler(asyncore.dispatcher_with_send):
 
 
 class Server(Base):
+	VICTIMS = []
 	def __init__(self,serverPort=60006,proto="TCP", caller=None):
 		self.TYPE = "Command Server"
 		Base.__init__(self,"TCP",serverPort,caller)
 		self.log("Started",2)
 	#end def
+	def createVictim(self, _id, pub_ip, priv_ip):
+		client_exists = False
+		for victim in self.VICTIMS:
+			if victim.VIC_ID == _id:
+				client_exists==True
+				break
+		if client_exists==False:
+			vic = Victim(pub_ip, priv_ip)
+			vic.VIC_ID= _id
+			self.VICTIMS.append(vic)
+			self.log("New client registered "+ vic.VIC_ID ,0)
+		vic.VIC_Id= _id
 	def protocolhandler(self,conn, addr):
 		global HANDLER
 		self.HANDLER = CMDProtoHandler(conn,addr,self)
+		print self.HANDLER
 	#end def
 #end class
 

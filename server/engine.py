@@ -22,10 +22,13 @@ class Engine():
 	SERVICE_THREAD = None
 	RULES = []
 	PROTOS=["FTP","IRC","SIP","H225"]	#supported protcols
-	def __init__(self, verbosity=0, logType="screen"):
+	def __init__(self, verbosity=0,getExtIp=False,logType="screen"):
 		global VERBOSITY, LOGTYPE, PUBLIC_IP
 		self.VERBOSITY = verbosity
-		self.PUBLIC_IP = self. getExternalIP()
+		if getExtIp:
+			self.PUBLIC_IP = self. getExternalIP()
+		else:
+			self.PUBLIC_IP = "SERVER_PUBLIC_IP"
 		LOGTYPE = logType #either "screen" or filename
 	#end def
 	
@@ -37,7 +40,7 @@ class Engine():
 		for server in self.SERVERS:
 			if server.TYPE=="Command Server":
 				if server.HANDLER:
-					return server.HANDLER.VICTIMS
+					return server.VICTIMS
 				else:
 					return []
 	def getExternalIP(self):
