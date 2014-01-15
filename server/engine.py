@@ -51,8 +51,7 @@ class Engine():
 			else:
 				sip = sip[:sip.index("<")]
 		except Exception,e:
-			print e
-			self.log("Failed to retrieve public IP from: http://checkip.dyndns.com :" + e.message,1)
+			self.log("Failed to retrieve public IP from: http://checkip.dyndns.com: " + str(e.args[0]),1)
 			sip =""
 		if sip=="":
 			#backup plan 
@@ -60,7 +59,7 @@ class Engine():
 				req = urllib2.urlopen('https://enabledns.com/ip',None,3)
 				sip = req.read()
 			except Exception, e:
-				self.log("Failed to retrieve public IP from: https://enabledns.com/ip" + e.message ,1)
+				self.log("Failed to retrieve public IP from: https://enabledns.com/ip: " + str(e.args[0]),1)
 				sip =""
 		if not self.isValidIPv4(sip):
 			self.log("getExternalIP(): Invalid IPv4 specification " + sip, 4)
