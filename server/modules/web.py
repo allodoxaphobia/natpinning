@@ -10,6 +10,7 @@ import select
 import time
 import uuid
 import base64
+from datetime import datetime
 
 class HTTPProtoHandler(asyncore.dispatcher_with_send):
 	REQPAGE = ""
@@ -32,6 +33,55 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				if headerparts[0].strip().upper()==header_name.upper():
 					result = header.strip()
 		return result
+	def handle_cmd(self,command):
+		"""Validates command structure, sends data for processing to engine (self.server.CALLER) and returns output to client"""
+		cmd_parts = command.split("_")
+		cmd = cmd_parts[0].upper().strip()
+		result="0"
+		if cmd=="REG":
+			if len(cmd_parts)!=2:
+				self.server.log("Received invalid REG command : " + command,2)
+			else:
+				client_ip = cmd_parts[1].strip()
+				if self.server.CALLER.isValidIPv4(client_ip)!=True:
+					self.server.log("Received invalid IP for REG command : " + command,2)
+				else:
+					client_id = self.server.CALLER.registerVictim(self,client_ip)
+					return client_id
+		elif cmd=="POLL":
+			if len(cmd_parts)!=2:
+				self.server.log("Received invalid POLL command : " + command,2)
+			else:
+				client_id = cmd_parts[1].strip()
+				client = self.server.CALLER.getVictimByVictimId(client_id)
+				if client != None:
+					client.LAST_SEEN= datetime.now()
+					for test in client.TESTS:
+						if test.STATUS=="NEW":
+							result = test.getTestString()
+							break
+				else:
+					self.server.log("Received POLL command for unknown client: " + command,4)
+		elif cmd=="ADD":
+			if len(cmd_parts)!=5:
+				self.server.log("Received invalid ADD command : " + command,2)
+			else:
+				client_id = cmd_parts[1].strip()
+				client = self.server.CALLER.getVictimByVictimId(client_id)
+				if client != None:
+					client.LAST_SEEN= datetime.now()
+					proto = cmd_parts[2].strip().upper()
+					ip = cmd_parts[3].strip()
+					port = cmd_parts[4].strip()
+					if proto in self.server.CALLER.PROTOS and self.server.CALLER.isValidIPv4(ip) and self.server.CALLER.isValidPort(port):						
+					#distrust whatever comes from the web
+						result = client.addTest(proto,ip,port)
+					else:
+						self.server.log("Received invalid ADD command : " + command,2)
+				else:
+					self.server.log("Received ADD command for unknown client:  " + command,4)
+		return result
+	
 	def handle_read(self):
 		global REQPAGE, REQHEADER, REQHEADERDONE
 		data = self.recv(1024)
@@ -51,7 +101,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		_page=_page.lower()
 		page = _page.split("?")[0];
 		if page != "":
-			arrPages = ["exploit.html","exploit.swf","gremwell_logo.png","login.html"]
+			arrPages = ["admin.html","exploit.swf","admin.css","admin.js","gremwell_logo.png","login.html"]
 			arrCommands = ["cli"]
 			if page in arrPages:
 				agent = self.get_header(data,"USER-AGENT",":")
@@ -67,14 +117,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 					if len(_page.split("?"))!=2:
 						body ="Invalid command."
 					else:
-						cmdsrv = self.getCommandServer()
-						if cmdsrv != None:
-							command= _page.split("?")[1].strip().split("_")
-							if command[0].upper()=="REG":
-								body=""
-								#DISABLED FOR NOW
-								#self.server.log("Web REG request " + cookie, 2)
-								#cmdsrv.createVictim(cookie,self.server.CALLER.getRemotePeer(self),"")
+						body=self.handle_cmd(_page.split("?")[1].strip())
 				else:
 					body=""
 			else:
