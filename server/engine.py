@@ -27,7 +27,6 @@ class Victim():
 		if tests != None: 
 			self.TESTS=tests
 	def addTest(self,proto, private_ip, private_port):
-		global TESTS
 		loTest = self.Test(proto,self.PUBLIC_IP, private_ip,private_port)
 		self.TESTS.append(loTest)
 		return loTest.TEST_ID
@@ -153,7 +152,7 @@ class Engine():
 		for server in self.SERVERS:
 			if server.TYPE=="Web Server":
 				sport = str(server.PORT)
-		return "http://"+sip+":"+sport+"/exploit.html?ci=LAN_IP_Of_Client"
+		return "http://"+sip+":"+sport+"/admin.html"
 	
 	def getVictimByVictimId(self,vicid):
 		""""Gets victim based in the victim id (remip+privip)"""
@@ -185,11 +184,14 @@ class Engine():
 			testid (string): test.TEST_ID; a unique identifier given to each test as defined in server/modules/cmd.py
 		"""
 		victims = self.getVictims()
+		result = None
 		if victims != None:
 			for victim in victims:
 				for test in victim.TESTS:
 					if test.TEST_ID==testid:
-						return test
+						result = test
+						break
+		return result
 	
 	def getVictimByTestId(self,testid):
 		"""Retrieves victim from loaded victims based on a certain testid.

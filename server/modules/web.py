@@ -80,6 +80,15 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 						self.server.log("Received invalid ADD command : " + command,2)
 				else:
 					self.server.log("Received ADD command for unknown client:  " + command,4)
+		elif  cmd=="STATUS":
+			if len(cmd_parts)!= 2:
+				self.server.log("Received invalid STATUS command : " + command,2)
+			else:
+				test = self.server.CALLER.getVictimTest(cmd_parts[1].strip())
+				if test != None:
+					result = test.STATUS + " " + str(test.RESULT)
+				else:
+					result = "0"
 		return result
 	
 	def handle_read(self):
@@ -101,7 +110,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		_page=_page.lower()
 		page = _page.split("?")[0];
 		if page != "":
-			arrPages = ["admin.html","exploit.swf","admin.css","admin.js","gremwell_logo.png","login.html"]
+			arrPages = ["admin.html","exploit.swf","admin.css","admin.js","tools.js","screen.js","gremwell_logo.png","login.html"]
 			arrCommands = ["cli"]
 			if page in arrPages:
 				agent = self.get_header(data,"USER-AGENT",":")

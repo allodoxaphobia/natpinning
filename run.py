@@ -229,9 +229,9 @@ class Shell():
 								result = "FAILED"
 							else:
 								result = "SUCCESS"
-							public_if = test.PUBLIC_IP + ":" + test.PUBLIC_PORT
-							private_if = test.PRIVATE_IP + ":" + test.PRIVATE_PORT
-							print "%10s%21s%5s%21s%10s%10s" % (test.TEST_TYPE,public_if,"=>",private_if,test.TRANSPORT,result)
+						public_if = test.PUBLIC_IP + ":" + test.PUBLIC_PORT
+						private_if = test.PRIVATE_IP + ":" + test.PRIVATE_PORT
+						print "%10s%21s%5s%21s%10s%10s" % (test.TEST_TYPE,public_if,"=>",private_if,test.TRANSPORT,result)
 		else:
 			print "Invalid list item specified, allowed values are: clients, services,tests"
 	def setTableLine(self,length):
@@ -305,7 +305,7 @@ def main():
 	print ""
 	print "Natpinning test tool"
 	print "--------------------"
-	print "Connect clients at http://" +x.PUBLIC_IP + ":" + str(opts.webport) + "/exploit.html?ci=PrivateIpOfClient"
+	print "Connect clients at " + x.getExploitPage()
 	print ""
 	s = Shell(x)
 
