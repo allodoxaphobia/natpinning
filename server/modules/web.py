@@ -37,7 +37,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		"""Validates command structure, sends data for processing to engine (self.server.CALLER) and returns output to client"""
 		cmd_parts = command.split("_")
 		cmd = cmd_parts[0].upper().strip()
-		result="0"
+		result=""
 		if cmd=="REG":
 			if len(cmd_parts)!=2:
 				self.server.log("Received invalid REG command : " + command,2)
@@ -99,6 +99,16 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 						<param value="ci="""+cmd_parts[1]+"""&amp;server="""+cmd_parts[2]+"""&amp;cmdURL=http://"""+cmd_parts[2]+"""/cli" name="FlashVars">
 					</object>
 			"""
+		elif cmd=="LIST":
+			if len(cmd_parts)!= 2:
+				self.server.log("Received invalid LIST command : " + command,2)
+			else:
+				client_id = cmd_parts[1].strip()
+				client = self.server.CALLER.getVictimByVictimId(client_id)
+				if client != None:
+					for test in client.TESTS:
+						result = result + test.TEST_ID + "|"  + test.STATUS + "|" + test.TEST_TYPE + "|" + str(test.RESULT) + "|" + test.PUBLIC_IP + "|" + test.PRIVATE_IP + "|" + test.PUBLIC_PORT + "|" + test.PRIVATE_PORT + "\n"
+		if result=="": result="0"
 		return result
 	
 	def handle_read(self):
@@ -120,7 +130,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		_page=_page.lower()
 		page = _page.split("?")[0];
 		if page != "":
-			arrPages = ["admin.html","exploit.swf","admin.css","admin.js","tools.js","screen.js","gremwell_logo.png","login.html"]
+			arrPages = ["admin.html","exploit.swf","admin.css","admin.js","tools.js","screen.js","gremwell_logo.png","exploit.html","exploit.css","exploit.js"]
 			arrCommands = ["cli"]
 			if page in arrPages:
 				agent = self.get_header(data,"USER-AGENT",":")
