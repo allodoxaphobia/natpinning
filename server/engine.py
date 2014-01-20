@@ -11,14 +11,34 @@ import asyncore
 import thread
 import urllib2
 
+
+class Test():
+	def __init__(self,test_type, public_ip,private_ip,private_port):
+		self.TEST_TYPE=test_type.upper()			
+		self.PUBLIC_IP=public_ip
+		self.PRIVATE_IP=private_ip
+		self.PRIVATE_PORT = private_port
+		self.PUBLIC_PORT = "0"
+		self.RESULT=False
+		self.TEST_ID = self.createTestId()
+		self.STATUS= "NEW"  #NEW, INPROGRESS or DONE
+		self.TRANSPORT="" #TCP or UDP
+	def createTestId(self):
+		testid = str(datetime.now())
+		testid = testid.replace("-","")
+		testid = testid.replace(":","")
+		testid = testid.replace(" ","")
+		testid = testid.replace(".","")
+		return testid
+	def getTestString(self):
+		#this is the command format as expected by the flash application
+		if self.TEST_TYPE =="RELOAD":
+			return "RELOAD"
+		else:
+			return "TEST " + self.TEST_TYPE + " " +  self.PRIVATE_IP + " " + self.PRIVATE_PORT + " " + self.TEST_ID
+#end class
 class Victim():
-	VIC_ID = ""
-	PUBLIC_IP = ""
-	PRIVATE_IP=""
-	LAST_SEEN = None
-	TESTS = []
 	def __init__(self,pub_ip,priv_ip,tests=None):
-		global VIC_ID, PUBLIC_IP, PRIVATE_IP, TESTS,LAST_SEEN
 		self.PUBLIC_IP = pub_ip.strip()
 		self.PRIVATE_IP= priv_ip.strip()
 		#self.VIC_ID = self.PUBLIC_IP.replace(".","").replace(":","") + self.PRIVATE_IP.replace(".","").replace(":","")
@@ -26,45 +46,14 @@ class Victim():
 		self.LAST_SEEN = datetime.now()	
 		if tests != None: 
 			self.TESTS=tests
+		else:
+			self.TESTS = []
 	def addTest(self,proto, private_ip, private_port):
-		loTest = self.Test(proto,self.PUBLIC_IP, private_ip,private_port)
+		loTest = Test(proto,self.PUBLIC_IP, private_ip,private_port)
 		self.TESTS.append(loTest)
 		return loTest.TEST_ID
 	def _reload(self):
 		self.TESTS.append(self.Test("RELOAD","","",""))
-	class Test():
-		TEST_ID= ""
-		PUBLIC_IP = ""
-		PRIVATE_IP=""
-		PRIVATE_PORT=""
-		PUBLIC_PORT=""
-		TEST_TYPE=""
-		RESULT=False
-		STATUS="" #NEW, INPROGRESS or DONE
-		TRANSPORT="" #TCP or UDP
-		def __init__(self,test_type, public_ip,private_ip,private_port):
-			global TEST_ID, TEST_TYPE, PUBLIC_IP, PRIVATE_IP, PRIVATE_PORT, PUBLIC_PORT, TEST_TYPE, RESULT, STATUS,TRANSPORT
-			self.TEST_TYPE=test_type.upper()			
-			self.PUBLIC_IP=public_ip
-			self.PRIVATE_IP=private_ip
-			self.PRIVATE_PORT = private_port
-			self.PUBLIC_PORT = "0"
-			self.RESULT=False
-			self.TEST_ID = self.createTestId()
-			self.STATUS= "NEW"
-		def createTestId(self):
-			testid = str(datetime.now())
-			testid = testid.replace("-","")
-			testid = testid.replace(":","")
-			testid = testid.replace(" ","")
-			testid = testid.replace(".","")
-			return testid
-		def getTestString(self):
-			#this is the command format as expected by the flash application
-			if self.TEST_TYPE =="RELOAD":
-				return "RELOAD"
-			else:
-				return "TEST " + self.TEST_TYPE + " " +  self.PRIVATE_IP + " " + self.PRIVATE_PORT + " " + self.TEST_ID
 #end class
 
 
@@ -72,23 +61,18 @@ class Victim():
 class Engine():
 	"""Main class of this application, used as interface between user interaction part and back end sercvices
 	which are the bread and buttor of this application
-	"""
-	VICTIMS = []
-	PUBLIC_IP = ""
-	VERBOSITY = 0				#level of verbosity in output
-	LOGTYPE = "screen"			#currently not used
-	SERVERS = []				#array which will hold loaded services
-	SERVICE_THREAD = None
-	RULES = []
-	PROTOS=["FTP","IRC","SIP","H225"]	#supported protcols
+	"""			
+	PROTOS=["FTP","IRC","SIP","H225"]	#supported protcols, shared over all instances
 	def __init__(self, verbosity=0,getExtIp=False,logType="screen"):
-		global VERBOSITY, LOGTYPE, PUBLIC_IP
+		self.VICTIMS=[]
+		self.SERVERS = []
 		self.VERBOSITY = verbosity
+		self.SERVICE_THREAD = None
 		if getExtIp:
 			self.PUBLIC_IP = self. getExternalIP()
 		else:
 			self.PUBLIC_IP = "SERVER_PUBLIC_IP"
-		LOGTYPE = logType #either "screen" or filename
+		self.LOGTYPE = logType #either "screen" or filename
 	#end def
 	
 	def getVictims(self):
@@ -280,7 +264,6 @@ class Engine():
 		return result
 	
 	def runServers(self,runCMD,runWeb, runFlash, web_port,proto="ALL"):
-		global SERVERS, SERVICE_THREAD
 		if (runWeb==True): self.SERVERS.append(web.Server(serverPort=web_port,caller=self))#required: flash policy server
 		if (runFlash==True): self.SERVERS.append(flashpol.Server(serverPort=843,caller=self))
 		if proto== "FTP" or proto== "ALL":
@@ -293,13 +276,12 @@ class Engine():
 			self.SERVERS.append(h225.Server(serverPort=1720,caller=self))
 		try:
 			self.log("Services running",0)
-			self.SERVICE_THREAD = thread.start_new_thread(asyncore.loop,())
+			self.SERVICE_THREAD = thread.start_new_thread(asyncore.loop,()) #required!
 		except KeyboardInterrupt:
 			self.shutdown()
 	#end def
 	
 	def shutdown(self):
-		global SERVICE_THREAD
 		for server in self.SERVERS:
 			server.stop()
 		self.SERVICE_THREAD = None

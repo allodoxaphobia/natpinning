@@ -10,14 +10,11 @@ from subprocess import call
 
 class Shell():
 	#Own Vars
-	ENGINE = None
-	CURR_VICTIM = None
 	COMMANDS = "HELP", "LIST", "SET", "TEST", "EXPLOIT", "QUIT", "EXIT", "CLEAR" , "RELOAD"
 	#cmd.Cmd vars
 	intro = ""
 	completekey='tab'
 	def __init__(self, engine):
-		global ENGINE
 		self.ENGINE = engine
 		print "Interactive shell, type <help> if you're not sure on how to proceed."
 		val = ""
@@ -192,7 +189,7 @@ class Shell():
 				print "\t" + str(x) + ".\t" + server.TYPE
 				x=x+1
 		elif item=="TESTS":
-			victim = None
+			loVictim = None
 			if len(self.ENGINE.getVictims())==0:
 				msg = "No clients connected. You can connect clients by making them browse to\n" + self.ENGINE.getExploitPage()
 				print msg
@@ -204,24 +201,25 @@ class Shell():
 				self.ENGINE.log("No client ID specified, defaulting to client 0",0)
 				vicid="0"
 			try:
-				victim = self.ENGINE.getVictimById(vicid)
+				loVictim = self.ENGINE.getVictimById(vicid)
 			except Exception,e:
 				print e.message
 				victim = None
-			if victim == None:
+			if loVictim == None:
 				print "Invalid client id specified. Type <help list> for correct syntax."
 				return 0
 			print "Client:"
-			print "   public ip: " + victim.PUBLIC_IP
-			print "   last seen: " + victim.LAST_SEEN.strftime("%H:%M:%S")
+			print "   public ip: " + loVictim.PUBLIC_IP
+			print "   private ip: " + loVictim.PRIVATE_IP
+			print "   last seen: " + loVictim.LAST_SEEN.strftime("%H:%M:%S")
 			print ""
 			header= "%10s%21s%5s%21s%10s%10s"  % ("Protocol","From"," ","To","TCP/UDP","Result")
 			print header
 			print self.setTableLine(len(header))
-			if len(victim.TESTS)==0:
+			if len(loVictim.TESTS)==0:
 				print "No tests performed on this client. Type <help test> for help on how to perform tests"
 			else:
-				for test in victim.TESTS:
+				for test in loVictim.TESTS:
 						if test.STATUS != "DONE":
 							result = test.STATUS
 						else:
@@ -245,16 +243,10 @@ class Shell():
 		user_input = raw_input(prompt).strip()
 		return user_input
 	def handleCMD(self,val):
-		global CURR_VICTIM
 		parts = val.split(" ")
 		command = parts[0].upper()
 		if command=="LIST":
 			self.handleCmd_list(val)
-		elif command=="SET":
-			if len(parts)==3:
-				if parts[1].upper() == "VIC":
-					self.CURR_VICTIM = int(parts[2])
-					print "Current victim set to " +  self.ENGINE.getVictimById(self.CURR_VICTIM).VIC_ID
 		elif command=="RELOAD":
 			if len(parts)==2:
 				client = self.ENGINE.getVictimById(int(parts[1]))

@@ -17,10 +17,8 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 	REQHEADER = ""
 	REQHEADERDONE = 0
 	def __init__(self,conn_sock, client_address, server):
-		global REQHEADER
-		global REQHEADERDONE
-		REQHEADERDONE = 0
-		REQHEADER = ""
+		self.REQHEADERDONE = 0
+		self.REQHEADER = ""
 		self.server=server
 		asyncore.dispatcher_with_send.__init__(self,conn_sock) #Line is required
 		self.server.log("Received connection from " + client_address[0] + ' on port ' + str(self.server.sPort),3)
@@ -74,7 +72,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 					ip = cmd_parts[3].strip()
 					port = cmd_parts[4].strip()
 					if proto in self.server.CALLER.PROTOS and self.server.CALLER.isValidIPv4(ip) and self.server.CALLER.isValidPort(port):						
-					#distrust whatever comes from the web
+						#distrust whatever comes from the web
 						result = client.addTest(proto,ip,port)
 					else:
 						self.server.log("Received invalid ADD command : " + command,2)
@@ -112,7 +110,6 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		return result
 	
 	def handle_read(self):
-		global REQPAGE, REQHEADER, REQHEADERDONE
 		data = self.recv(1024)
 		request = self.get_header(data,"GET", " ")
 		cookie = self.get_header(data,"cookie", ":")
