@@ -13,14 +13,6 @@ We also attempted to extend this proof-of-concept to a more mature state by addi
 
 For more extended information on how and why this works, check out our wiki: https://github.com/allodoxaphobia/natpinning/wiki
 
-How it works
-============
-The application consists of of a server compnent (python) and a client component (web page).
-
-The server is a python script which needs to be run from an Internet based host, with a public IP assigned to it and not firewalled.
-Once the script is running it will open dummy services (irc, ftp, sip ), a flash policy server and a web service.
-
-The client is the combination of HTML, JavaScript and, most importantly, a AS3 (Actionscript 3) flash file. 
 
 Installation
 ==============
