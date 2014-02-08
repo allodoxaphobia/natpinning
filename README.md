@@ -4,8 +4,8 @@ This tool is based of the original NAT pinning proof-of-concept by Samy Kamkar: 
 
 Samy's original proof-of-concept was javascript based, which brought with it several shortcommings:
 
-	- client-response sequences might be broken due to additional HTTP headers
-	- opening some ports might be blocked by browsers (e.g.: 6667 for irc on Firefox)
+* client-response sequences might be broken due to additional HTTP headers
+* opening some ports might be blocked by browsers (e.g.: 6667 for irc on Firefox)
 
 To overcome these issues we switched to flash as client side component. This allowed the use of Flash sockets, which don't have the extra overhead of HTTP headers and are not restricted by browser policies. 
 
