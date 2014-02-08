@@ -11,6 +11,7 @@ To overcome these issues we switched to flash as client side component. This all
 
 We also attempted to extend this proof-of-concept to a more mature state by adding support for more protocols and creating a server side tool which gives some level of control over the client behavior.
 
+For more extended information on how and why this works, check out our wiki: https://github.com/allodoxaphobia/natpinning/wiki
 
 How it works
 ============
