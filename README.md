@@ -25,7 +25,9 @@ Installation
 ==============
 Tested on xubuntu and backtrack, requires python 2.7
 to install:
+```
 git clone https://github.com/allodoxaphobia/natpinning.git
+```
 
 
 Usage
