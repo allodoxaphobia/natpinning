@@ -303,5 +303,10 @@ def main():
 
 #end def
 if __name__ == '__main__':
-    main()
+	py_version = sys.version_info[:2]
+	if py_version[0]!=2 or py_version[1]!=7:
+		print("Currently only python 2.7 is supported")
+		exit(0)
+	else:
+		main()
 
