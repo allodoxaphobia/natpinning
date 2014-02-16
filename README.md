@@ -15,7 +15,7 @@ To install:
 ```
 git clone https://github.com/allodoxaphobia/natpinning.git
 ```
-
+More information on installation can be found [here](https://github.com/allodoxaphobia/natpinning/wiki/Installation).
 
 Usage
 ==============
