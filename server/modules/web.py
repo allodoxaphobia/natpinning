@@ -4,12 +4,7 @@
 
 from base import *
 import socket
-import random
-import struct
-import select
 import time
-import uuid
-import base64
 from urllib import unquote
 from datetime import datetime
 
@@ -42,7 +37,10 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				if param_name !="ts":#ignore timestamp
 					params[param_name]=item[1].strip()
 					if params[param_name]!="":
-						params[param_name] = unquote(params[param_name]).decode('utf8')
+						try:
+							params[param_name] = unquote(params[param_name])
+						except UnicodeDecodeError:
+							self.server.log("Error in web.parseURLArgs: can't decode string " + params[param_name],2)
 			return params
 		except Exception, e:
 				self.server.log("Error in web.parseURLArgs('"+command+"') : " + e.message,2)
@@ -141,11 +139,6 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 	def handle_read(self):
 		data = self.recv(1024)
 		request = self.get_header(data,"GET", " ")
-		cookie = self.get_header(data,"cookie", ":")
-		if cookie == "":
-			cookie = base64.urlsafe_b64encode(uuid.uuid4().bytes).replace("=","")
-		else:
-			cookie = cookie.split(" ")[1]
 		_page = ""
 		if request <>"":
 			headerparts = request.split(" ")
@@ -156,17 +149,20 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 		_page=_page.lower()
 		page = _page.split("?")[0];
 		if page != "":
-			arrPages = ["admin.html","exploit.swf","admin.css","admin.js","tools.js","screen.js","gremwell_logo.png","exploit.html","exploit.css","exploit.js"]
+			arrPages = ["admin.html","exploit.swf", "admin.css","admin.js","tools.js","screen.js","gremwell_logo.png","exploit.html","exploit.css","exploit.js"]
 			arrCommands = ["cli"]
 			if page in arrPages:
 				agent = self.get_header(data,"USER-AGENT",":")
 				self.server.log("---" + agent,4)
-				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nSet-Cookie: $cookie$\r\nContent-Length: $len$\r\n\r\n"""
+				if page =="exploit.swf":
+					respheader="""HTTP/1.1 200 OK\r\nContent-Type: application/x-shockwave-flash; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
+				else:
+					respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
 				f = open("exploit/"+page,"r")
 				body = f.read()
 				f.close()		
 			elif page in arrCommands:
-				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nSet-Cookie: $cookie$\r\nContent-Length: $len$\r\n\r\n"""
+				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
 				body=""
 				if page=="cli":
 					if len(_page.split("?"))!=2:
@@ -176,11 +172,10 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				else:
 					body=""
 			else:
-				respheader="""HTTP/1.1 404 NOT FOUND\r\nServer: NatPin Exploit Server\r\nSet-Cookie: $cookie$\r\nContent-Length: 0\r\n\r\n"""
+				respheader="""HTTP/1.1 404 NOT FOUND\r\nServer: NatPin Exploit Server\r\nContent-Length: 0\r\n\r\n"""
 				body = ""
 			respheader = respheader.replace("$len$",str(len(body)))
-			respheader = respheader.replace("$cookie$",cookie)
-			self.send(respheader+body)
+			self.send(respheader + body)
 			#self.send(body)
 #end class
 

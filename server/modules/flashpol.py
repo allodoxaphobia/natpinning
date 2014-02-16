@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 #filename=irc.py
 from base import *
-import socket
-import random
-import struct
-import select
 
 class FPProtoHandler(asyncore.dispatcher_with_send):
 	def __init__(self,conn_sock, client_address, server):

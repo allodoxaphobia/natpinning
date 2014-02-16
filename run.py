@@ -2,9 +2,7 @@
 from server import engine
 from optparse import OptionParser
 from server.tools import ip
-import sys
-import readline
-import socket
+from sys import version_info
 from datetime import datetime
 from subprocess import call
 
@@ -303,7 +301,7 @@ def main():
 
 #end def
 if __name__ == '__main__':
-	py_version = sys.version_info[:2]
+	py_version = version_info[:2]
 	if py_version[0]!=2 or py_version[1]!=7:
 		print("Currently only python 2.7 is supported")
 		exit(0)
