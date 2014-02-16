@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 #filename=h225.py
+#
+#
+# Copyright Gremwell,2013
+# Author: Raf Somers
+# License: GNU General Public License, version 3
+#
+#
+
 from base import *
 import socket
 import random

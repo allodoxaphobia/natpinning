@@ -1,6 +1,12 @@
 #!/usr/bin/env python
-#filename=web.py
-#This module acts as a very simple HTTP webserver and will feed the exploit page.
+#filename=sip.py
+#
+#
+# Copyright Gremwell,2013
+# Author: Raf Somers
+# License: GNU General Public License, version 3
+#
+#	SIP service 
 
 from base import *
 import socket

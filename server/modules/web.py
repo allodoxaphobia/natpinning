@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 #filename=web.py
-#This module acts as a very simple HTTP webserver and will feed the exploit page.
+#
+#
+# Copyright Gremwell,2013
+# Author: Raf Somers
+# License: GNU General Public License, version 3
+#
+#	This module acts as a very simple HTTP webserver and will feed pages required to
+#	run the client application.
+#	Note that only files defined in array arrPages will be served, all other requests will return an HTTP 404
 
 from base import *
 import socket

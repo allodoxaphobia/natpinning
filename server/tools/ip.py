@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+#filename=ip.py
+#
+#
+# Copyright Gremwell,2013
+# Author: Raf Somers
+# License: GNU General Public License, version 3
+#
+
 def isPrivateAddress(_ip):
 	result = False
 	if isIPv4(_ip):

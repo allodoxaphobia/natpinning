@@ -1,5 +1,13 @@
 #!/usr/bin/env python
-#filename=irc.py
+#filename=flashpol.py
+#
+# Copyright Gremwell,2013
+# Author: Raf Somers
+# License: GNU General Public License, version 3
+#
+#	Flash policy server
+#	Creates a listening socket on port 843 and generates a very permisive flash policy file
+
 from base import *
 
 class FPProtoHandler(asyncore.dispatcher_with_send):

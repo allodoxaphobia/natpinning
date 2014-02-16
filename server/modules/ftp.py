@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 #filename=ftp.py
+#
+#
+# Copyright Gremwell,2013
+# Author: Raf Somers
+# License: GNU General Public License, version 3
+#
+#	FTP Service class
+#	called from engine.Engine will create a listening socket on port 21
+#	and mimick behaviour of an FTP server
+#	inherits Base class
+
 from base import *
 import socket
 import random

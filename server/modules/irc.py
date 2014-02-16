@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 #filename=irc.py
+#
+#
+# Copyright Gremwell,2013
+# Author: Raf Somers
+# License: GNU General Public License, version 3
+#
+#	IRC service class, creates listening socket 
+#	and mimicks behaviour of an IRC server
+#
+
 from base import *
 import socket
 import random

@@ -1,8 +1,12 @@
 #!/usr/bin/env python
-#filename=barebone.py
-
-#This file is a barebone service
-#use this file as template for services you wish to add
+#filename=dummy.py
+#
+#
+# Copyright Gremwell,2013
+# Author: Raf Somers
+# License: GNU General Public License, version 3
+#
+#	This file conains a barebone service that you can use to create new services.
 
 class MyProtoHandler(asyncore.dispatcher_with_send):
 	"""Barebone protocol handler, use this a template when adding a new protocol

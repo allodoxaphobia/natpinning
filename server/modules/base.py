@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 #filename=base.py
-
+#
+#
+# Copyright Gremwell,2013
+# Author: Raf Somers
+# License: GNU General Public License, version 3
+#
+#	Base class used by service classes.
+#	Each service class you implement should inherit this class.
+#
 from __future__ import with_statement
 from threading import Thread
 import random
@@ -12,6 +20,7 @@ import subprocess
 import asyncore
 import sys
 from server.tools import ip
+
 
 class Base(asyncore.dispatcher):
 	VICTIMID = ""

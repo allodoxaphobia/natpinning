@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+#filename=run.py
+#
+#
+# Copyright Gremwell,2013
+# Author: Raf Somers
+# License: GNU General Public License, version 3
+#
 from server import engine
 from optparse import OptionParser
 from server.tools import ip
@@ -7,6 +14,10 @@ from datetime import datetime
 from subprocess import call
 
 class Shell():
+	"""Class to handle CLI interface
+		Usage: clsShell= Shell(engine)
+		whereby engine is aninstance of class engine.Engine
+	"""
 	#Own Vars
 	COMMANDS = "HELP", "LIST", "SET", "TEST", "EXPLOIT", "QUIT", "EXIT", "CLEAR" , "RELOAD"
 	#cmd.Cmd vars
@@ -302,8 +313,8 @@ def main():
 #end def
 if __name__ == '__main__':
 	py_version = version_info[:2]
-	if py_version[0]!=2 or py_version[1]!=7:
-		print("Currently only python 2.7 is supported")
+	if py_version[0]!=2 or py_version[1] not in (4,6,7):
+		print("Currently only Python 2.4, 2.6 and 2.7 supported.")
 		exit(0)
 	else:
 		main()
