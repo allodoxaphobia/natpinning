@@ -1,15 +1,8 @@
 NATpinning
 ===============
-This tool is based of the original NAT pinning proof-of-concept by Samy Kamkar: http://samy.pl/natpin/.
+Based on Samy Kamkar's original idea of NATpinning (http://samy.pl/natpin/), this tool allows pentration testers to identify possible security issues with connection trackers on gateway devices. This is achieved by using a custom FLASH script which mimicks the behaviour of protcols that would normally trigger connection tracking to occur on these devices. As the client can be controlled from the server it can be instructed which protocols to mimick, in what order they should be performed and which port or IP they should use in their communications. This gives the tester the ability to test for assigned port (1-1024) exposure or exposure of other LAN based devices.
 
-Samy's original proof-of-concept was javascript based, which brought with it several shortcommings:
-
-* client-response sequences might be broken due to additional HTTP headers
-* opening some ports might be blocked by browsers (e.g.: 6667 for irc on Firefox)
-
-To overcome these issues we switched to flash as client side component. This allowed the use of Flash sockets, which don't have the extra overhead of HTTP headers and are not restricted by browser policies. 
-
-We also attempted to extend this proof-of-concept to a more mature state by adding support for more protocols and creating a server side tool which gives some level of control over the client behavior.
+FLASH was chosen as client component as it is capable of raw socket communications. This removes the overhead of additional HTTP headers when using javascript and HTTP POST requests, as witnessed in Samy's original proof of concept.
 
 For more extended information on how and why this works, check out our wiki: https://github.com/allodoxaphobia/natpinning/wiki
 
@@ -17,7 +10,8 @@ For more extended information on how and why this works, check out our wiki: htt
 Installation
 ==============
 Tested on xubuntu and backtrack, requires python 2.7
-to install:
+
+To install:
 ```
 git clone https://github.com/allodoxaphobia/natpinning.git
 ```
@@ -39,6 +33,7 @@ Options:
   -v VERBOSE          Verbosity level, default is 0, set to 5 if you like a
                       lot of output.
 ```
+More information on usage and usage examples can be found [here](https://github.com/allodoxaphobia/natpinning/wiki/Usage)
 
 License
 ==============
