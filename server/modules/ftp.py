@@ -71,8 +71,12 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 				else:
 					self.server.log("Invalid FTP command:" + request,1)
 					self.send("500 did not understand that.\n")
-		except Exception,e:
-				self.server.log("Error receiving/sending data." ,0)
+		except socket.error,e:
+				if e.errno==9: #bad file descriptor:client terminated socket without being nice about it
+					self.close()
+				else:
+					self.server.log("Error receiving/sending data." ,0)
+					print e
 	#end def
 	def ftpCalcAddr(self,lsPortCommand):
 		try:
