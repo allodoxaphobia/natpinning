@@ -29,52 +29,62 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 	def handle_read(self):
 		try:
 			request = self.recv(1024).strip()
-			if (request[:4].upper() == "PORT"):
-				self.cbport = self.ftpCalcPort(request)
-				self.cbaddr = self.ftpCalcAddr(request)
-				if (self.cbport > 0 ):
-					self.server.log("Callback expected on " + self.cbaddr + ":" + str(self.cbport),2)
-				else:
-					if self.cbaddr=="0.0.0.0":
-						self.server.log("Received 0.0.0.0 as IP. Possibly windows firewall.",0)
-					else:
-						self.server.log("Failed to calculate port from: " + line,1)
-					self.send("200 Let's do this\n")
-			elif (request[:4].upper() == "USER"):
-				parts = request.split(" ")
-				self.server.TESTID = parts[1]
-				self.send("331 user ok, need pass\n")
-			elif (request[:4].upper() == "PASS"):
-				self.send("230 is good\n")
-			elif (request[:4].upper() == "LIST"):
-				self.send("150 opening data connection\n")
-				self.server.log("FTP Received PORT + LIST callback request for " + self.cbaddr + " on port " + str(self.cbport),2)
-				self.server.callback(self.cbaddr,int(self.cbport),"TCP","FTP PORT", self.server.TESTID)		
-			elif (request[:4].upper()=="PASV"):
-				pass #TODO			
-			elif (request[:4].upper()=="QUIT"):
-				self.send("221 byebye\n")
-				self.close()
-			elif len(request)<4 and len(request)>0:
-				self.send("500 did not understand that.\n")
+			if len(request)<4:
 				self.server.log("Invalid FTP command:" + request,1)
-				pass
-			elif len(request)==0:
-				#client closed connection
-				self.server.log("FTP client closed connection.",1)
-				self.close()
+				self.send("500 did not understand that.\n")
 			else:
-				self.server.log("Invalid FTP command:" + request,1)
-				self.send("500 did not understand that.\n")
+				if (request[:4].upper() == "PORT"):
+					self.cbport = self.ftpCalcPort(request)
+					self.cbaddr = self.ftpCalcAddr(request)
+					if (self.cbport > 0 ):
+						self.server.log("FTP Port command for " + self.cbaddr + ":" + str(self.cbport),2)
+					else:
+						if self.cbaddr=="0.0.0.0":
+							#yes, seriously, windows firewall: who would've though hey...
+							self.server.log("Received 0.0.0.0 as IP. Possibly Windows Firewall.",0)
+						else:
+							self.server.log("Failed to calculate port from: " + line,1)
+					self.send("200 Let's do this\n")
+				elif (request[:4].upper() == "USER"):
+					parts = request.split(" ")
+					self.server.TESTID = parts[1]
+					self.send("331 user ok, need pass\n")
+				elif (request[:4].upper() == "PASS"):
+					self.send("230 is good\n")
+				elif (request[:4].upper() == "LIST"):
+					self.send("150 opening data connection\n")
+					self.server.log("FTP Received PORT + LIST callback request for " + self.cbaddr + " on port " + str(self.cbport),2)
+					self.server.callback(self.cbaddr,int(self.cbport),"TCP","FTP PORT", self.server.TESTID)		
+				elif (request[:4].upper()=="PASV"):
+					pass #TODO			
+				elif (request[:4].upper()=="QUIT"):
+					self.send("221 byebye\n")
+					self.close()
+				elif len(request)<4 and len(request)>0:
+					self.send("500 did not understand that.\n")
+					self.server.log("Invalid FTP command:" + request,1)
+					pass
+				elif len(request)==0:
+					#client closed connection
+					self.server.log("FTP client closed connection.",1)
+					self.close()
+				else:
+					self.server.log("Invalid FTP command:" + request,1)
+					self.send("500 did not understand that.\n")
 		except Exception,e:
-				self.server.log("Error receiving/sending data." ,1)
+				self.server.log("Error receiving/sending data." ,0)
 	#end def
 	def ftpCalcAddr(self,lsPortCommand):
 		try:
 			ls = lsPortCommand.split(" ")
 			parts = ls[1].split(",")
-			return parts[0] + "." + parts[1] + "." + parts[2] + "." + parts[3]
+			if len(parts)!=6:
+				self.server.log("Invalid PORT command: " + lsPortCommand,2)
+				return ""
+			else:
+				return parts[0] + "." + parts[1] + "." + parts[2] + "." + parts[3]
 		except:
+			self.server.log("Error calculating address from: " + lsPortCommand,0)
 			return ""
 	def ftpCalcPort(self,lsPortCommand):
 		try:
@@ -83,10 +93,15 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 			ls = ls.replace("PORT","")
 			ls = ls.strip()
 			parts = ls.split(",")
-			x = int(parts[4])
-			y = int(parts[5])
-			return int(parts[4])*256 + int(parts[5])
+			if len(parts)!=6:
+				self.server.log("Invalid PORT command: " + lsPortCommand,2)
+				return 0
+			else:
+				x = int(parts[4])
+				y = int(parts[5])
+				return int(parts[4])*256 + int(parts[5])
 		except:
+			self.server.log("Error calculating port from: " + lsPortCommand,0)
 			return 0
 	#end def
 #end class
