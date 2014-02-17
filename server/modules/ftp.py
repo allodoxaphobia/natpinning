@@ -35,8 +35,11 @@ class FTPProtoHandler(asyncore.dispatcher_with_send):
 				if (self.cbport > 0 ):
 					self.server.log("Callback expected on " + self.cbaddr + ":" + str(self.cbport),2)
 				else:
-					self.server.log("Failed to calculate port from: " + line,1)
-				self.send("200 Let's do this\n")
+					if self.cbaddr=="0.0.0.0":
+						self.server.log("Received 0.0.0.0 as IP. Possibly windows firewall.",0)
+					else:
+						self.server.log("Failed to calculate port from: " + line,1)
+					self.send("200 Let's do this\n")
 			elif (request[:4].upper() == "USER"):
 				parts = request.split(" ")
 				self.server.TESTID = parts[1]
